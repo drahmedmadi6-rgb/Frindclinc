@@ -2,17 +2,48 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>NEO KIDS - Doctor Dashboard</title>
-    <!-- تم الحفاظ على ملف الـ CSS الخاص بك لضمان الهوية والموبايل -->
+    <!-- ملف الـ CSS الأصلي الخاص بك للحفاظ على الهوية -->
     <link rel="stylesheet" href="css/doctor.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    
     <style>
-        /* إضافة بسيطة لعلامة الفرع فقط (للحفاظ على هويتك الأصلية) */
+        /* علامة الفرع المدمجة (Master Control) */
         .source-badge { font-size: 0.75rem; padding: 2px 6px; border-radius: 4px; font-weight: bold; display: inline-block; margin-top: 4px; }
         .source-neo { background: #e0e7ff; color: #3730a3; border: 1px solid #c7d2fe; }
         .source-frnd { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+
+        /* =========================================
+           أكواد توافق الموبايل والتابلت (Responsive)
+           لا تعمل إلا على الشاشات الصغيرة
+           ========================================= */
+        @media (max-width: 768px) {
+            .app-container { flex-direction: column; }
+            
+            /* تحويل القائمة الجانبية لشريط سفلي احترافي */
+            .sidebar { width: 100%; height: 65px; position: fixed; bottom: 0; left: 0; flex-direction: row; box-shadow: 0 -4px 10px rgba(0,0,0,0.1); z-index: 1000; }
+            .brand { display: none; }
+            .nav-menu { flex-direction: row; padding: 0; width: 100%; justify-content: space-around; background: #0f172a; /* لون القائمة الداكن */ }
+            .nav-link { flex: 1; flex-direction: column; padding: 10px 5px; gap: 4px; border-right: none; font-size: 0.75rem; justify-content: center; border-top: 3px solid transparent; }
+            .nav-link.active { border-right: none; border-top-color: #2563eb; background: rgba(255,255,255,0.05); }
+            .nav-link i { font-size: 1.3rem; margin: 0; }
+
+            .main-content { margin-bottom: 65px; } /* لترك مساحة للشريط السفلي */
+            .stats-grid { grid-template-columns: 1fr; gap: 15px; }
+            .workspace-grid { grid-template-columns: 1fr; gap: 15px; }
+            
+            /* تحويل التبويبات الطبية لتمرير أفقي بالسحب */
+            .clinical-nav ul { flex-direction: row; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; padding-bottom: 5px; }
+            .clinical-nav li { padding: 12px 15px; border-bottom: none; border-left: none; border-bottom: 3px solid transparent; font-size: 0.95rem; display: inline-block; }
+            .clinical-nav li.active { border-right: none; border-bottom-color: #2563eb; }
+            
+            .form-grid { grid-template-columns: 1fr; gap: 15px; }
+            .patient-header-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+            .consultation-actions { display: flex; flex-direction: column; gap: 10px; }
+            .consultation-actions button { width: 100%; }
+        }
     </style>
 </head>
 <body>
@@ -38,7 +69,7 @@
 
         <main class="main-content">
             <header class="top-header">
-                <h2 id="pageTitle">قائمة مرضى اليوم</h2>
+                <h2 id="pageTitle">قائمة مرضى اليوم (مدمجة)</h2>
                 <div class="user-info">
                     <span class="user-role">Dr. Ahmed Mady</span>
                     <i class="fa-solid fa-user-doctor"></i>
@@ -298,6 +329,7 @@
         import { getFirestore, collection, addDoc, getDocs, getDoc, doc, query, where, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
         import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-storage.js";
 
+        // إعدادات Firebase الخاصة بك
         const firebaseConfig = {
             apiKey: "AIzaSyDJ2PMemkLDrVWS2PMH9z7glG-yK0QDNsg",
             authDomain: "friends-clinic.firebaseapp.com",
@@ -379,7 +411,7 @@
             return Math.abs(ageDt.getUTCFullYear() - 1970) + " سنة";
         }
 
-        // --- الميزة الأساسية: جلب حالات العيادتين (NEO + الأصدقاء) ---
+        // --- جلب حالات العيادتين معاً ---
         async function getMergedAppointments(dateStr) {
             let apps = [];
             try {
@@ -396,13 +428,11 @@
             return apps;
         }
 
-        // تم إضافة مسار البحث (patCol) لمعرفة جدول العيادة
         async function getPatientProfile(patientId, patCol = "patients") {
             const snap = await getDoc(doc(db, patCol, patientId));
             return snap.exists() ? { id: snap.id, ...snap.data() } : null;
         }
 
-        // تم إضافة مسار التحديث (appCol) لمعرفة جدول العيادة
         async function initOrGetVisit(appId, patientId, mrn, appCol = "appointments") {
             const q = query(collection(db, "visits"), where("appId", "==", appId));
             const snap = await getDocs(q);
@@ -473,7 +503,6 @@
             async function loadDashboard() {
                 showLoading("جاري تحميل العيادة...");
                 try {
-                    // استدعاء حالات العيادتين معاً
                     const apps = await getMergedAppointments(getTodayStr());
                     const tbody = document.querySelector('#todayTable tbody');
                     tbody.innerHTML = '';
@@ -488,12 +517,15 @@
                         const tr = document.createElement('tr');
                         let actionBtn = '';
                         
-                        // حل المشكلة الخبيثة: تشفير النص بالكامل لمنع أي كسر في زر الإدخال
-                        let safeComplaint = encodeURIComponent(app.complaint || '');
-
+                        // التعديل الاحترافي لمنع انهيار الزرار (باستخدام data attributes بدلاً من النصوص المباشرة)
                         if(app.status === 'Waiting' || app.status === 'In Consultation') {
-                            // إضافة إرسال اسم الجداول للزرار لمعرفة مصدر العيادة
-                            actionBtn = `<button type="button" class="btn-primary btn-small" onclick="window.startConsultation('${app.id}', '${app.patientId}', '${app.mrn}', '${safeComplaint}', '${app.appCol}', '${app.patCol}')">Start / Resume</button>`;
+                            actionBtn = `<button type="button" class="btn-primary btn-small btn-start-visit" 
+                                data-appid="${app.id}" 
+                                data-patientid="${app.patientId}" 
+                                data-mrn="${app.mrn}" 
+                                data-complaint="${encodeURIComponent(app.complaint || '')}" 
+                                data-appcol="${app.appCol}" 
+                                data-patcol="${app.patCol}">Start / Resume</button>`;
                         } else if (app.status === 'Completed') {
                             actionBtn = `<span class="text-muted">Completed</span>`;
                         }
@@ -516,6 +548,14 @@
                         tbody.appendChild(tr);
                     });
 
+                    // تفعيل الزرار بطريقة آمنة جداً 100%
+                    document.querySelectorAll('.btn-start-visit').forEach(btn => {
+                        btn.addEventListener('click', (e) => {
+                            const d = e.currentTarget.dataset;
+                            window.startConsultation(d.appid, d.patientid, d.mrn, d.complaint, d.appcol, d.patcol);
+                        });
+                    });
+
                     document.getElementById('dashWaitingCount').innerText = wCount;
                     document.getElementById('dashConsultingCount').innerText = cCount;
                     document.getElementById('dashCompletedCount').innerText = dCount;
@@ -527,11 +567,9 @@
                 hideLoading();
             }
 
-            // استقبال اسم الجدول للعيادة عشان يقرأ المريض صح
-            window.startConsultation = async (appId, patientId, mrn, encodedComplaint, appCol = "appointments", patCol = "patients") => {
+            window.startConsultation = async (appId, patientId, mrn, encodedComplaint, appCol, patCol) => {
                 showLoading("تجهيز الملف الطبي...");
                 try {
-                    // فك التشفير للشكوى بدون مشاكل
                     const receptionComplaint = decodeURIComponent(encodedComplaint);
                     
                     const patient = await getPatientProfile(patientId, patCol);
@@ -588,7 +626,6 @@
                     renderMedicationsTable();
                     loadPreviousVisits();
 
-                    // التبديل للقسم الصحيح
                     showSection('consultationSection');
                     document.querySelector('[data-tab="tab-overview"]').click();
                 } catch (e) {
