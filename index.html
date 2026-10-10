@@ -7,6 +7,8 @@
     <!-- ملف الـ CSS الأصلي الخاص بك للحفاظ على الهوية -->
     <link rel="stylesheet" href="css/doctor.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- مكتبة Chart.js لمنحنيات النمو -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
     
     <style>
@@ -512,6 +514,44 @@
                                         </div>
                                     </div>
                                 </div>
+                                <!-- Tab: Growth Tracking -->
+                                <div id="tab-growth" class="tab-pane hidden">
+                                    <h3 class="section-title">قياسات الزيارة الحالية</h3>
+                                    <div class="form-grid">
+                                        <div class="form-group">
+                                            <label>المرجع الطبي (Reference)</label>
+                                            <select id="gChartType">
+                                                <option value="WHO">WHO (0-5 Years)</option>
+                                                <option value="CDC">CDC (2-20 Years)</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group"><label>الوزن (Weight - Kg)</label><input type="number" step="0.01" id="gWeight"></div>
+                                        <div class="form-group"><label>الطول/القامة (Length/Height - cm)</label><input type="number" step="0.1" id="gHeight"></div>
+                                        <div class="form-group"><label>محيط الرأس (HC - cm)</label><input type="number" step="0.1" id="gHC"></div>
+                                    </div>
+                                    <div class="consultation-actions-container mt-10">
+                                        <button type="button" id="btnCalcGrowth" class="btn-primary" style="width: 100%;"><i class="fa-solid fa-calculator"></i> حساب التقييم (Z-Score & Percentile)</button>
+                                    </div>
+
+                                    <div id="growthResultsBox" class="mt-20 hidden" style="background: #e0e7ff; padding: 15px; border-radius: 8px; border: 1px solid #c7d2fe;">
+                                        <!-- سيتم حقن النتائج هنا بواسطة الجافاسكريبت -->
+                                    </div>
+
+                                    <h3 class="section-title mt-20">منحنى النمو التفاعلي</h3>
+                                    <div class="form-group mb-10">
+                                        <label>المؤشر المعروض على الرسم:</label>
+                                        <select id="gChartIndicator">
+                                            <option value="WFA">الوزن بالنسبة للعمر (Weight-for-Age)</option>
+                                            <option value="LFA">الطول بالنسبة للعمر (Length-for-Age)</option>
+                                            <option value="WFL">الوزن بالنسبة للطول (Weight-for-Length)</option>
+                                            <option value="BMI">مؤشر كتلة الجسم (BMI-for-Age)</option>
+                                            <option value="HCFA">محيط الرأس للعمر (HC-for-Age)</option>
+                                        </select>
+                                    </div>
+                                    <div style="position: relative; height:400px; width:100%; background: #fff; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px;">
+                                        <canvas id="growthChartCanvas"></canvas>
+                                    </div>
+                                </div>
 
                                 <!-- Tab: Previous Visits -->
                                 <div id="tab-previous" class="tab-pane hidden">
@@ -850,6 +890,17 @@
                         document.getElementById('vHeight').value = visit.vitals.height || '';
                         document.getElementById('vSpo2').value = visit.vitals.spo2 || '';
                     }
+                    if (visit.growth) {
+                        document.getElementById('gChartType').value = visit.growth.reference || 'WHO';
+                        document.getElementById('gWeight').value = visit.growth.weight || '';
+                        document.getElementById('gHeight').value = visit.growth.height || '';
+                        document.getElementById('gHC').value = visit.growth.hc || '';
+                    } else {
+                        // تفريغ الحقول إذا كانت الزيارة جديدة
+                        document.getElementById('gWeight').value = '';
+                        document.getElementById('gHeight').value = '';
+                        document.getElementById('gHC').value = '';
+                    }
                     if (visit.history) {
                         document.getElementById('hpi').value = visit.history.hpi || '';
                         document.getElementById('histGestational').value = visit.history.gestational || '';
@@ -957,6 +1008,12 @@
                         weight: document.getElementById('vWeight').value,
                         height: document.getElementById('vHeight').value,
                         spo2: document.getElementById('vSpo2').value
+                    },
+                    growth: {
+                        reference: document.getElementById('gChartType').value,
+                        weight: document.getElementById('gWeight').value,
+                        height: document.getElementById('gHeight').value,
+                        hc: document.getElementById('gHC').value
                     },
                     history: {
                         hpi: document.getElementById('hpi').value,
