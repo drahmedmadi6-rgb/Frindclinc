@@ -1183,6 +1183,184 @@
                 }
             });
 
+            // ==========================================
+            // وحدة متابعة النمو (Growth Tracking Engine)
+            // ==========================================
+            let growthChartInstance = null;
+
+            // دالة مساعدة لحساب العمر بالأشهر الدقيقة
+            function getAgeInMonths(dobString, visitDateObj) {
+                if (!dobString) return 0;
+                const dob = new Date(dobString);
+                const visit = visitDateObj ? new Date(visitDateObj) : new Date();
+                const diffMs = visit.getTime() - dob.getTime();
+                return diffMs / (1000 * 60 * 60 * 24 * 30.4375);
+            }
+
+            // 1. التعامل مع زر "حساب التقييم"
+            const btnCalcGrowth = document.getElementById('btnCalcGrowth');
+            if (btnCalcGrowth) {
+                btnCalcGrowth.addEventListener('click', async () => {
+                    const weight = parseFloat(document.getElementById('gWeight').value);
+                    const height = parseFloat(document.getElementById('gHeight').value);
+                    const hc = parseFloat(document.getElementById('gHC').value);
+                    const ref = document.getElementById('gChartType').value;
+                    const indicator = document.getElementById('gChartIndicator').value;
+
+                    if (!weight && !height && !hc) {
+                        showToast("يرجى إدخال قياس واحد على الأقل", "error");
+                        return;
+                    }
+
+                    // حساب BMI إذا توفر الوزن والطول
+                    let bmi = null;
+                    if (weight > 0 && height > 0) {
+                        bmi = (weight / Math.pow(height / 100, 2)).toFixed(2);
+                    }
+
+                    const resultsBox = document.getElementById('growthResultsBox');
+                    resultsBox.classList.remove('hidden');
+                    
+                    let html = `<strong style="color:var(--primary-color);"><i class="fa-solid fa-chart-line"></i> ملخص قياسات الزيارة الحالية:</strong><ul style="margin-top:10px; padding-right:20px;">`;
+                    if (weight) html += `<li><strong>الوزن:</strong> ${weight} كجم</li>`;
+                    if (height) html += `<li><strong>الطول/القامة:</strong> ${height} سم</li>`;
+                    if (hc) html += `<li><strong>محيط الرأس:</strong> ${hc} سم</li>`;
+                    if (bmi) html += `<li><strong>مؤشر كتلة الجسم (BMI):</strong> ${bmi}</li>`;
+                    html += `</ul>`;
+                    
+                    // توضيح بخصوص مراجع WHO/CDC (الالتزام بالمعايير)
+                    html += `<hr style="border-top:1px solid #c7d2fe; margin:10px 0;">`;
+                    html += `<small class="text-muted"><i class="fa-solid fa-circle-info"></i> <strong>تنويه طبي:</strong> تم اختيار مرجع (${ref}). لحساب Z-Score و Percentile بدقة متناهية، يتطلب النظام ربط ملفات الـ LMS الرسمية المعتمدة بصيغة JSON. حالياً يتم رسم المسار التاريخي للطفل بدقة لمعرفة اتجاه النمو (Growth Velocity).</small>`;
+                    
+                    resultsBox.innerHTML = html;
+
+                    // تحديث الرسم البياني بالبيانات الجديدة
+                    await renderGrowthChart(indicator, { weight, height, hc, bmi });
+                });
+            }
+
+            // 2. تحديث الرسم عند تغيير المؤشر من القائمة (مثلاً من الطول للوزن)
+            const gChartIndicator = document.getElementById('gChartIndicator');
+            if (gChartIndicator) {
+                gChartIndicator.addEventListener('change', async (e) => {
+                    const indicator = e.target.value;
+                    const weight = parseFloat(document.getElementById('gWeight').value);
+                    const height = parseFloat(document.getElementById('gHeight').value);
+                    const hc = parseFloat(document.getElementById('gHC').value);
+                    
+                    let bmi = null;
+                    if (weight > 0 && height > 0) bmi = (weight / Math.pow(height / 100, 2)).toFixed(2);
+
+                    await renderGrowthChart(indicator, { weight, height, hc, bmi });
+                });
+            }
+
+            // 3. دالة رسم المنحنى التفاعلي (Chart.js)
+            async function renderGrowthChart(indicator, currentData) {
+                const canvas = document.getElementById('growthChartCanvas');
+                if (!canvas) return;
+                const ctx = canvas.getContext('2d');
+
+                // تدمير الرسم القديم لمنع تداخل الرسومات
+                if (growthChartInstance) {
+                    growthChartInstance.destroy();
+                }
+
+                // جلب تاريخ المريض لربط النقاط السابقة
+                let pastVisits = [];
+                try {
+                    pastVisits = await getPreviousVisits(currentPatientId, currentVisitId);
+                } catch(e) { console.error("Error loading past visits for chart", e); }
+
+                const dobStr = document.getElementById('phDOB').innerText;
+                
+                // تحضير الداتا السابقة
+                const historicalPoints = [];
+                pastVisits.forEach(v => {
+                    if (v.growth) {
+                        const ageMonths = getAgeInMonths(dobStr, v.createdAt?.toDate ? v.createdAt.toDate() : new Date(v.createdAt));
+                        let val = null;
+                        if (indicator === 'WFA' && v.growth.weight) val = parseFloat(v.growth.weight);
+                        if (indicator === 'LFA' && v.growth.height) val = parseFloat(v.growth.height);
+                        if (indicator === 'HCFA' && v.growth.hc) val = parseFloat(v.growth.hc);
+                        if (indicator === 'BMI' && v.growth.weight && v.growth.height) {
+                            val = (parseFloat(v.growth.weight) / Math.pow(parseFloat(v.growth.height)/100, 2)).toFixed(2);
+                        }
+                        if (val !== null && !isNaN(val)) historicalPoints.push({ x: ageMonths.toFixed(2), y: parseFloat(val).toFixed(2) });
+                    }
+                });
+
+                // إضافة نقطة الزيارة الحالية للرسم
+                const currentAgeMonths = getAgeInMonths(dobStr, new Date());
+                let currentVal = null;
+                if (indicator === 'WFA') currentVal = currentData.weight;
+                if (indicator === 'LFA') currentVal = currentData.height;
+                if (indicator === 'HCFA') currentVal = currentData.hc;
+                if (indicator === 'BMI') currentVal = currentData.bmi;
+
+                if (currentVal !== null && currentVal !== undefined && !isNaN(currentVal)) {
+                    historicalPoints.push({ x: currentAgeMonths.toFixed(2), y: parseFloat(currentVal).toFixed(2) });
+                }
+
+                // ترتيب النقاط زمنياً لتوصيل الخط بشكل صحيح
+                historicalPoints.sort((a, b) => a.x - b.x);
+
+                // إعداد عناوين المحاور بناءً على المؤشر المختار
+                let yLabel = 'القياس';
+                if (indicator === 'WFA') yLabel = 'الوزن (كجم)';
+                if (indicator === 'LFA') yLabel = 'الطول (سم)';
+                if (indicator === 'HCFA') yLabel = 'محيط الرأس (سم)';
+                if (indicator === 'BMI') yLabel = 'مؤشر كتلة الجسم (BMI)';
+
+                const config = {
+                    type: 'line',
+                    data: {
+                        datasets: [
+                            {
+                                label: 'مسار نمو الطفل (Patient Growth Track)',
+                                data: historicalPoints,
+                                borderColor: 'var(--primary-color)',
+                                backgroundColor: 'var(--primary-color)',
+                                borderWidth: 3,
+                                pointRadius: 6,
+                                pointHoverRadius: 9,
+                                fill: false,
+                                tension: 0.2 // انحناء خفيف للخط
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: {
+                                type: 'linear',
+                                title: { display: true, text: 'العمر الدقيق (بالأشهر)', font: { weight: 'bold' } },
+                                min: 0
+                            },
+                            y: {
+                                title: { display: true, text: yLabel, font: { weight: 'bold' } }
+                            }
+                        },
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const age = parseFloat(context.parsed.x);
+                                        const years = Math.floor(age / 12);
+                                        const months = Math.floor(age % 12);
+                                        const ageText = years > 0 ? `${years} سنة و ${months} شهر` : `${months} شهر`;
+                                        return `العمر: ${ageText} | القياس: ${context.parsed.y}`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                };
+
+                growthChartInstance = new Chart(ctx, config);
+            }
+
             loadDashboard();
         });
     </script>
