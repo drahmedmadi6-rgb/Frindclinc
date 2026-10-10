@@ -148,84 +148,110 @@
         }
 
         @media (max-width: 768px) {
-            body { overflow-x: hidden; }
-            .app-container { flex-direction: column; width: 100%; }
-            
-            /* تحويل القائمة الجانبية لشريط سفلي احترافي وآمن */
-            .sidebar { 
-                width: 100%; 
-                height: calc(65px + var(--safe-area-bottom)); 
-                position: fixed; 
-                bottom: 0; left: 0; right: 0; 
-                flex-direction: row; 
-                box-shadow: 0 -4px 15px rgba(0,0,0,0.1); 
-                z-index: 1000; 
-                padding-bottom: var(--safe-area-bottom);
+            /* 1. إصلاح جذري لعرض الشاشة ومنع الخروج عن الحواف */
+            html, body { 
+                overflow-x: hidden !important; 
+                width: 100% !important; 
+                max-width: 100vw !important; 
+                margin: 0 !important; 
+                padding: 0 !important; 
             }
-            .brand { display: none; }
-            .nav-menu { flex-direction: row; padding: 0; width: 100%; justify-content: space-around; background: var(--sidebar-bg); align-items: center; }
-            .nav-link { flex: 1; flex-direction: column; padding: 8px 4px; gap: 4px; border-right: none; font-size: 0.75rem; justify-content: center; text-align: center; border-top: 3px solid transparent; }
-            .nav-link.active { border-right: none; border-top-color: var(--primary-color); background: rgba(255,255,255,0.05); }
-            .nav-link i { font-size: 1.2rem; margin: 0; }
-
+            
+            .app-container { 
+                flex-direction: column !important; 
+                width: 100% !important;
+                max-width: 100vw !important;
+                overflow-x: hidden !important;
+            }
+            
+            /* 2. إلغاء أي هوامش قادمة من doctor.css كانت تدفع المحتوى لليسار */
             .main-content { 
-                margin-bottom: calc(75px + var(--safe-area-bottom)); 
-                padding: 12px; 
-                width: 100%; 
-                max-width: 100%;
+                margin: 0 !important; /* هذا السطر يحل مشكلة الفراغ الأبيض يمين الشاشة */
+                margin-bottom: calc(75px + var(--safe-area-bottom)) !important; 
+                padding: 10px !important; 
+                width: 100% !important; 
+                max-width: 100vw !important;
+                box-sizing: border-box !important;
+                overflow-x: hidden !important;
             } 
-            
-            /* ترتيب الهيدر للموبايل لتجنب خروج العناصر */
-            header.top-header { flex-wrap: wrap; gap: 10px; margin-bottom: 15px; justify-content: space-between; }
-            header.top-header h2 { font-size: 1.2rem; }
-            .user-info { font-size: 0.85rem; padding: 6px 10px; }
 
-            .stats-grid { grid-template-columns: 1fr; gap: 12px; }
-            .workspace-grid { display: flex; flex-direction: column; gap: 12px; width: 100%; }
+            /* 3. إجبار الكروت على احترام حجم الشاشة */
+            .card {
+                width: 100% !important;
+                max-width: 100% !important;
+                box-sizing: border-box !important;
+                margin-left: 0 !important;
+                margin-right: 0 !important;
+                overflow: hidden !important; /* لمنع الجداول من تدمير العرض */
+            }
             
-            /* منع تداخل أزرار الكارد في الموبايل */
-            .card-header { flex-direction: column; align-items: flex-start !important; gap: 12px; }
-            .card-header button { width: 100%; }
+            /* تحويل القائمة الجانبية لشريط سفلي */
+            .sidebar { 
+                width: 100% !important; 
+                height: calc(65px + var(--safe-area-bottom)) !important; 
+                position: fixed !important; 
+                bottom: 0 !important; left: 0 !important; right: 0 !important; 
+                flex-direction: row !important; 
+                box-shadow: 0 -4px 15px rgba(0,0,0,0.1) !important; 
+                z-index: 1000 !important; 
+                padding-bottom: var(--safe-area-bottom) !important;
+                margin: 0 !important;
+            }
+            .brand { display: none !important; }
+            .nav-menu { flex-direction: row !important; padding: 0 !important; width: 100% !important; justify-content: space-around !important; background: var(--sidebar-bg) !important; align-items: center !important; height: 100% !important; }
+            .nav-link { flex: 1 !important; flex-direction: column !important; padding: 8px 4px !important; gap: 4px !important; border-right: none !important; font-size: 0.75rem !important; justify-content: center !important; text-align: center !important; border-top: 3px solid transparent !important; margin: 0 !important; }
+            .nav-link.active { border-right: none !important; border-top-color: var(--primary-color) !important; background: rgba(255,255,255,0.05) !important; }
+            .nav-link i { font-size: 1.2rem !important; margin: 0 !important; }
 
-            /* تحويل التبويبات الطبية لتمرير أفقي بسلاسة للموبايل */
-            .clinical-nav { width: 100%; overflow: hidden; padding: 0; }
+            /* ترتيب الهيدر */
+            header.top-header { flex-wrap: wrap !important; gap: 10px !important; margin-bottom: 15px !important; justify-content: space-between !important; width: 100% !important; box-sizing: border-box !important; }
+            header.top-header h2 { font-size: 1.2rem !important; margin: 0 !important; }
+            .user-info { font-size: 0.85rem !important; padding: 6px 10px !important; }
+
+            .stats-grid { grid-template-columns: 1fr !important; gap: 12px !important; width: 100% !important; }
+            .workspace-grid { display: flex !important; flex-direction: column !important; gap: 12px !important; width: 100% !important; }
+            
+            .card-header { flex-direction: column !important; align-items: flex-start !important; gap: 12px !important; }
+            .card-header button { width: 100% !important; }
+
+            /* تحويل التبويبات الطبية لتمرير أفقي */
+            .clinical-nav { width: 100% !important; overflow: hidden !important; padding: 0 !important; }
             .clinical-nav ul { 
-                flex-direction: row; 
-                overflow-x: auto; 
-                scroll-snap-type: x mandatory;
-                white-space: nowrap; 
-                -webkit-overflow-scrolling: touch; 
-                display: flex; 
-                border-bottom: 1px solid var(--border-color);
+                flex-direction: row !important; 
+                overflow-x: auto !important; 
+                scroll-snap-type: x mandatory !important;
+                white-space: nowrap !important; 
+                -webkit-overflow-scrolling: touch !important; 
+                display: flex !important; 
+                border-bottom: 1px solid var(--border-color) !important;
             }
-            .clinical-nav ul::-webkit-scrollbar { display: none; } /* إخفاء شريط التمرير جمالياً */
+            .clinical-nav ul::-webkit-scrollbar { display: none !important; }
             .clinical-nav li { 
-                padding: 14px 16px; 
-                border-bottom: 3px solid transparent; 
-                border-left: none;
+                padding: 14px 16px !important; 
+                border-bottom: 3px solid transparent !important; 
+                border-left: none !important;
                 border-right: none !important;
-                font-size: 0.95rem; 
-                display: inline-block; 
-                flex-shrink: 0; 
-                scroll-snap-align: start;
+                font-size: 0.95rem !important; 
+                display: inline-block !important; 
+                flex-shrink: 0 !important; 
+                scroll-snap-align: start !important;
             }
-            .clinical-nav li.active { border-bottom-color: var(--primary-color); }
+            .clinical-nav li.active { border-bottom-color: var(--primary-color) !important; }
             
-            .form-grid { grid-template-columns: 1fr; gap: 12px; }
+            .form-grid { grid-template-columns: 1fr !important; gap: 12px !important; width: 100% !important; }
             
-            /* تنظيم بيانات المريض لمنع خروج النص عن الشاشة */
-            .patient-header-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 0.9rem; word-break: break-word; }
-            .patient-header-grid strong { display: block; margin-top: 4px; }
+            .patient-header-grid { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 12px !important; font-size: 0.9rem !important; word-break: break-word !important; }
+            .patient-header-grid strong { display: block !important; margin-top: 4px !important; }
             
-            /* أزرار الإجراءات (حفظ، طباعة، إنهاء) بشكل عمودي للموبايل */
-            .consultation-actions-container { flex-direction: column; gap: 12px; }
-            .consultation-actions-container button { width: 100%; padding: 14px; font-size: 1rem; flex: none; }
+            .consultation-actions-container { flex-direction: column !important; gap: 12px !important; width: 100% !important; }
+            .consultation-actions-container button { width: 100% !important; padding: 14px !important; font-size: 1rem !important; flex: none !important; }
             
-            /* تأمين الجداول في الموبايل لتسهيل التمرير الأفقي */
-            .data-table th, .data-table td { padding: 10px 8px; font-size: 0.9rem; }
+            /* تأمين الجداول */
+            .table-responsive { width: 100% !important; overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; margin: 0 !important; }
+            .data-table { min-width: 600px !important; }
+            .data-table th, .data-table td { padding: 10px 8px !important; font-size: 0.9rem !important; }
             
-            /* Toast Position Adjustment for Mobile Bottom Nav */
-            .toast { top: auto; bottom: calc(85px + var(--safe-area-bottom)); transform: translateX(-50%); }
+            .toast { top: auto !important; bottom: calc(85px + var(--safe-area-bottom)) !important; transform: translateX(-50%) !important; }
         }
 
         /* =========================================
