@@ -1188,29 +1188,20 @@
             // وحدة متابعة النمو (Growth Tracking Engine)
             // ==========================================
             let growthChartInstance = null;
-            let GrowthEngine = null; // سيتم تحميله ديناميكياً
 
-            // دالة التحميل الديناميكي (تمنع توقف النظام بالكامل إذا كان الملف مفقوداً)
-            async function initGrowthEngine() {
-                if (GrowthEngine) return true; // محمل مسبقاً
-                try {
-                    const module = await import("./js/growth-engine.js");
-                    GrowthEngine = module.GrowthEngine;
-                    return true;
-                } catch (e) {
-                    console.error("Growth Engine Error:", e);
-                    showToast("تنبيه: ملف js/growth-engine.js غير موجود على السيرفر. لن تعمل حسابات النمو، لكن العيادة مستمرة.", "error");
-                    return false;
-                }
+            // دالة مساعدة لحساب العمر لتجنب الاعتماد الكلي على المحرك الخارجي في الرسم
+            function getAgeInMonths(dobString, visitDateObj) {
+                if (!dobString || dobString === '--') return 0;
+                const dob = new Date(dobString);
+                const visit = visitDateObj ? new Date(visitDateObj) : new Date();
+                const diffMs = visit.getTime() - dob.getTime();
+                return diffMs / (1000 * 60 * 60 * 24 * 30.4375);
             }
 
             // 1. التعامل مع زر "حساب التقييم"
             const btnCalcGrowth = document.getElementById('btnCalcGrowth');
             if (btnCalcGrowth) {
                 btnCalcGrowth.addEventListener('click', async () => {
-                    const isEngineReady = await initGrowthEngine();
-                    if (!isEngineReady) return; // إيقاف العملية بأمان دون انهيار النظام
-
                     const weight = parseFloat(document.getElementById('gWeight').value);
                     const height = parseFloat(document.getElementById('gHeight').value);
                     const hc = parseFloat(document.getElementById('gHC').value);
@@ -1222,7 +1213,11 @@
                         return;
                     }
 
-                    let bmi = GrowthEngine.calculateBMI(weight, height);
+                    // حساب BMI إذا توفر الوزن والطول
+                    let bmi = null;
+                    if (weight > 0 && height > 0) {
+                        bmi = (weight / Math.pow(height / 100, 2)).toFixed(2);
+                    }
 
                     const resultsBox = document.getElementById('growthResultsBox');
                     resultsBox.classList.remove('hidden');
@@ -1234,27 +1229,29 @@
                     if (bmi) html += `<li><strong>مؤشر كتلة الجسم (BMI):</strong> ${bmi}</li>`;
                     html += `</ul>`;
                     
+                    // توضيح بخصوص مراجع WHO/CDC (الالتزام بالمعايير)
                     html += `<hr style="border-top:1px solid #c7d2fe; margin:10px 0;">`;
-                    html += `<small class="text-muted"><i class="fa-solid fa-circle-info"></i> <strong>تنويه طبي:</strong> تم اختيار مرجع (${ref}). لحساب Z-Score بدقة، يجب تحميل ملفات LMS الرسمية (JSON) لتمريرها إلى GrowthEngine.calculateZScore(). حالياً يتم رسم مسار سرعة النمو للطفل فقط.</small>`;
+                    html += `<small class="text-muted"><i class="fa-solid fa-circle-info"></i> <strong>تنويه طبي:</strong> تم اختيار مرجع (${ref}). لحساب Z-Score و Percentile بدقة متناهية، يتطلب النظام ربط ملفات الـ LMS الرسمية المعتمدة بصيغة JSON. حالياً يتم رسم المسار التاريخي للطفل بدقة لمعرفة اتجاه النمو (Growth Velocity).</small>`;
                     
                     resultsBox.innerHTML = html;
+
+                    // تحديث الرسم البياني بالبيانات الجديدة
                     await renderGrowthChart(indicator, { weight, height, hc, bmi });
                 });
             }
 
-            // 2. تحديث الرسم عند تغيير المؤشر من القائمة
+            // 2. تحديث الرسم عند تغيير المؤشر من القائمة (مثلاً من الطول للوزن)
             const gChartIndicator = document.getElementById('gChartIndicator');
             if (gChartIndicator) {
                 gChartIndicator.addEventListener('change', async (e) => {
-                    const isEngineReady = await initGrowthEngine();
-                    if (!isEngineReady) return;
-
                     const indicator = e.target.value;
                     const weight = parseFloat(document.getElementById('gWeight').value);
                     const height = parseFloat(document.getElementById('gHeight').value);
                     const hc = parseFloat(document.getElementById('gHC').value);
                     
-                    let bmi = GrowthEngine.calculateBMI(weight, height);
+                    let bmi = null;
+                    if (weight > 0 && height > 0) bmi = (weight / Math.pow(height / 100, 2)).toFixed(2);
+
                     await renderGrowthChart(indicator, { weight, height, hc, bmi });
                 });
             }
@@ -1265,16 +1262,20 @@
                 if (!canvas) return;
                 const ctx = canvas.getContext('2d');
 
+                // تدمير الرسم القديم لمنع تداخل الرسومات
                 if (growthChartInstance) {
                     growthChartInstance.destroy();
                 }
 
+                // جلب تاريخ المريض لربط النقاط السابقة
                 let pastVisits = [];
                 try {
                     pastVisits = await getPreviousVisits(currentPatientId, currentVisitId);
                 } catch(e) { console.error("Error loading past visits for chart", e); }
 
-                const dobStr = document.getElementById('p              // تحضير الداتا السابقة
+                const dobStr = document.getElementById('phDOB').innerText;
+                
+                // تحضير الداتا السابقة
                 const historicalPoints = [];
                 pastVisits.forEach(v => {
                     if (v.growth) {
