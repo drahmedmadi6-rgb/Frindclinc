@@ -1,208 +1,59 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NEO KIDS | Clinical Workspace</title>
+    <title>NEO KIDS - Doctor Dashboard</title>
+    <!-- ملف الـ CSS الأصلي الخاص بك للحفاظ على الهوية -->
     <link rel="stylesheet" href="css/doctor.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
     
     <style>
-        :root {
-            --primary: #0f766e; /* Teal */
-            --primary-hover: #115e59;
-            --navy: #0f172a;
-            --navy-light: #1e293b;
-            --slate: #64748b;
-            --slate-light: #f1f5f9;
-            --bg-color: #f8fafc;
-            --card-bg: #ffffff;
-            --text-main: #334155;
-            --border-color: #e2e8f0;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --success: #10b981;
-            --font-en: 'Inter', sans-serif;
-            --font-ar: 'Tajawal', sans-serif;
-            --nav-height: 65px;
-        }
+        /* علامة الفرع المدمجة (Master Control) */
+        .source-badge { font-size: 0.75rem; padding: 2px 6px; border-radius: 4px; font-weight: bold; display: inline-block; margin-top: 4px; }
+        .source-neo { background: #e0e7ff; color: #3730a3; border: 1px solid #c7d2fe; }
+        .source-frnd { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-
-        body {
-            font-family: var(--font-en);
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            -webkit-font-smoothing: antialiased;
-        }
-
-        /* Typography */
-        h1, h2, h3, h4 { color: var(--navy); font-weight: 600; }
-        .text-primary { color: var(--primary); }
-        .text-muted { color: var(--slate); font-size: 0.875rem; }
-        .text-ar { font-family: var(--font-ar); direction: rtl; }
-
-        /* Layout */
-        .app-container { display: flex; min-height: 100vh; }
-        .main-content { flex: 1; padding: 24px; margin-left: 250px; padding-bottom: 24px; transition: margin 0.3s ease; }
-        
-        /* Sidebar (Desktop) */
-        .sidebar {
-            width: 250px;
-            background-color: var(--navy);
-            color: white;
-            position: fixed;
-            height: 100vh;
-            left: 0;
-            top: 0;
-            display: flex;
-            flex-direction: column;
-            z-index: 100;
-        }
-        .brand { padding: 24px; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .brand h1 { color: white; font-size: 1.5rem; margin-bottom: 4px; letter-spacing: 1px; }
-        .doctor-name { font-weight: 500; font-size: 0.95rem; }
-        .specialty { color: #94a3b8; font-size: 0.8rem; }
-        
-        .nav-menu { padding: 16px 0; display: flex; flex-direction: column; gap: 4px; }
-        .nav-link {
-            padding: 12px 24px; color: #cbd5e1; text-decoration: none;
-            display: flex; align-items: center; gap: 12px; font-weight: 500;
-            transition: all 0.2s ease; border-left: 4px solid transparent;
-        }
-        .nav-link:hover, .nav-link.active { background-color: var(--navy-light); color: white; border-left-color: var(--primary); }
-
-        /* Header */
-        .top-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-        .top-header h2 { font-size: 1.5rem; }
-        .user-info { display: flex; align-items: center; gap: 12px; background: var(--card-bg); padding: 8px 16px; border-radius: 99px; border: 1px solid var(--border-color); }
-
-        /* Dashboard Stats */
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
-        .stat-card {
-            background: var(--card-bg); padding: 20px; border-radius: 12px;
-            border: 1px solid var(--border-color); display: flex; align-items: center; gap: 16px;
-        }
-        .stat-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; }
-        .stat-icon.waiting { background: #fffbeb; color: var(--warning); }
-        .stat-icon.consultation { background: #f0fdf4; color: var(--success); }
-        .stat-icon.completed { background: #f1f5f9; color: var(--slate); }
-        .stat-info h3 { font-size: 0.875rem; color: var(--slate); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .stat-info p { font-size: 1.5rem; font-weight: 700; color: var(--navy); }
-
-        /* Cards & Containers */
-        .card { background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 24px; overflow: hidden; }
-        .card-header { padding: 16px 20px; border-bottom: 1px solid var(--border-color); background: #f8fafc; }
-        .card-header h3 { font-size: 1.1rem; display: flex; align-items: center; justify-content: space-between; }
-        
-        /* Patient Queue Table -> Mobile Cards */
-        .table-responsive { overflow-x: auto; }
-        .data-table { width: 100%; border-collapse: collapse; text-align: left; }
-        .data-table th { padding: 12px 20px; background: #f8fafc; color: var(--slate); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; border-bottom: 1px solid var(--border-color); }
-        .data-table td { padding: 16px 20px; border-bottom: 1px solid var(--border-color); vertical-align: middle; }
-        
-        .badge { padding: 4px 10px; border-radius: 99px; font-size: 0.75rem; font-weight: 600; }
-        .badge.Waiting { background: #fffbeb; color: #b45309; }
-        .badge.In.Consultation, .badge.consultation { background: #f0fdfa; color: #0f766e; }
-        .badge.Completed { background: #f1f5f9; color: #475569; }
-        
-        .source-badge { font-size: 0.7rem; padding: 2px 8px; border-radius: 4px; font-weight: 600; display: inline-block; margin-top: 4px; }
-        .source-neo { background: #e0e7ff; color: #3730a3; }
-        .source-frnd { background: #dcfce7; color: #166534; }
-
-        /* Buttons */
-        button { cursor: pointer; font-family: inherit; transition: all 0.2s; font-weight: 500; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
-        .btn-primary { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 8px; }
-        .btn-primary:hover { background: var(--primary-hover); }
-        .btn-secondary { background: white; color: var(--navy); border: 1px solid var(--border-color); padding: 10px 20px; border-radius: 8px; }
-        .btn-secondary:hover { background: var(--slate-light); }
-        .btn-small { padding: 6px 12px; font-size: 0.85rem; }
-
-        /* Patient Header */
-        .patient-header-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; padding: 20px; }
-        .patient-header-grid > div { display: flex; flex-direction: column; gap: 4px; }
-        .patient-header-grid small { color: var(--slate); font-size: 0.8rem; text-transform: uppercase; font-weight: 600; }
-        .patient-header-grid strong { color: var(--navy); font-size: 1rem; }
-        .patient-header-grid .patient-name { font-size: 1.25rem; color: var(--primary); }
-
-        /* Clinical Workspace */
-        .clinical-nav { border-bottom: 1px solid var(--border-color); background: var(--card-bg); border-radius: 12px 12px 0 0; }
-        .clinical-nav ul { list-style: none; display: flex; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
-        .clinical-nav ul::-webkit-scrollbar { display: none; }
-        .clinical-nav li { padding: 16px 24px; font-size: 0.95rem; color: var(--slate); font-weight: 500; cursor: pointer; border-bottom: 3px solid transparent; white-space: nowrap; }
-        .clinical-nav li.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 600; }
-        
-        .clinical-content { padding: 24px; border-radius: 0 0 12px 12px; border-top: none; }
-        .tab-pane { display: none; animation: fadeIn 0.3s ease; }
-        .tab-pane.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* Forms */
-        .section-title { font-size: 1.1rem; color: var(--navy); margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
-        .form-group { display: flex; flex-direction: column; gap: 6px; }
-        .form-group.full-width { grid-column: 1 / -1; }
-        
-        label { font-size: 0.85rem; font-weight: 600; color: var(--slate); }
-        input[type="text"], input[type="number"], input[type="date"], select, textarea {
-            padding: 10px 14px; border: 1px solid var(--border-color); border-radius: 8px;
-            font-family: inherit; font-size: 0.95rem; transition: border-color 0.2s; background: white;
-        }
-        input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.1); }
-        textarea { resize: vertical; min-height: 80px; }
-
-        .consultation-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--border-color); }
-
-        /* Utilities */
-        .hidden { display: none !important; }
-        .mt-10 { margin-top: 10px; } .mt-20 { margin-top: 20px; }
-        
-        /* Mobile Overrides (Mobile First approach logic shifted to breakpoints) */
+        /* =========================================
+           إصلاحات وتحسينات الموبايل والتابلت (Responsive)
+           ========================================= */
         @media (max-width: 768px) {
-            .app-container { flex-direction: column; }
-            .sidebar { width: 100%; height: var(--nav-height); top: auto; bottom: 0; flex-direction: row; border-top: 1px solid rgba(255,255,255,0.1); }
+            body { overflow-x: hidden; }
+            .app-container { flex-direction: column; width: 100%; box-sizing: border-box; }
+            
+            /* تحويل القائمة الجانبية لشريط سفلي احترافي وآمن */
+            .sidebar { width: 100%; height: 65px; position: fixed; bottom: 0; left: 0; right: 0; flex-direction: row; box-shadow: 0 -4px 10px rgba(0,0,0,0.1); z-index: 1000; background: #0f172a; }
             .brand { display: none; }
-            .nav-menu { flex-direction: row; width: 100%; justify-content: space-around; padding: 0; }
-            .nav-link { flex-direction: column; padding: 8px; gap: 4px; font-size: 0.75rem; border-left: none; border-top: 3px solid transparent; flex: 1; justify-content: center; }
-            .nav-link.active { border-left: none; border-top-color: var(--primary); }
-            
-            .main-content { margin-left: 0; padding: 16px; margin-bottom: var(--nav-height); }
-            .top-header { flex-direction: column; align-items: flex-start; gap: 12px; }
-            
-            /* Card-based Mobile Table */
-            .data-table thead { display: none; }
-            .data-table tbody tr { display: block; border: 1px solid var(--border-color); border-radius: 12px; margin-bottom: 16px; padding: 16px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
-            .data-table tbody td { display: block; border: none; padding: 4px 0; }
-            .data-table tbody td:first-child { font-weight: 600; color: var(--slate); font-size: 0.85rem; margin-bottom: 8px; }
-            .data-table tbody td:nth-child(3) { font-size: 1.1rem; font-weight: 700; color: var(--navy); }
-            .data-table tbody td:last-child { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-color); }
-            .data-table tbody td button { width: 100%; }
+            .nav-menu { flex-direction: row; padding: 0; width: 100%; justify-content: space-around; background: #0f172a; align-items: center; }
+            .nav-link { flex: 1; flex-direction: column; padding: 8px 4px; gap: 4px; border-right: none; font-size: 0.75rem; justify-content: center; border-top: 3px solid transparent; text-align: center; }
+            .nav-link.active { border-right: none; border-top-color: #2563eb; background: rgba(255,255,255,0.05); }
+            .nav-link i { font-size: 1.2rem; margin: 0; }
 
-            .consultation-actions { flex-direction: column; }
-            .consultation-actions button { width: 100%; }
+            .main-content { margin-bottom: 75px; padding: 10px; width: 100%; box-sizing: border-box; } 
+            .stats-grid { grid-template-columns: 1fr; gap: 10px; }
+            .workspace-grid { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+            
+            /* تحويل التبويبات الطبية لتمرير أفقي بالسحب بسلاسة */
+            .clinical-nav { width: 100%; overflow: hidden; }
+            .clinical-nav ul { flex-direction: row; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; padding-bottom: 5px; display: flex; }
+            .clinical-nav li { padding: 10px 12px; border-bottom: none; border-left: none; border-bottom: 3px solid transparent; font-size: 0.85rem; display: inline-block; flex-shrink: 0; }
+            .clinical-nav li.active { border-right: none; border-bottom-color: #2563eb; }
+            
+            .form-grid { grid-template-columns: 1fr; gap: 10px; }
+            .patient-header-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.85rem; }
+            .consultation-actions { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+            .consultation-actions button { width: 100%; padding: 12px; font-size: 0.95rem; }
+            
+            .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+            .data-table th, .data-table td { padding: 8px 6px; font-size: 0.85rem; }
         }
-
-        /* Loading & Toasts */
-        .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .spinner { border: 4px solid var(--slate-light); border-top: 4px solid var(--primary); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 16px; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        
-        .toast { position: fixed; top: 20px; right: 20px; background: var(--navy); color: white; padding: 12px 24px; border-radius: 8px; z-index: 10000; box-shadow: 0 4px 6px rgba(0,0,0,0.1); font-weight: 500; }
-        
-        /* Print Styles */
-        @media print {
-            .no-print { display: none !important; }
-            .print-only { display: block !important; }
-            body { background: white; color: black; font-family: var(--font-ar); }
-        }
-        .print-only { display: none; }
     </style>
 </head>
 <body>
     <div id="loadingOverlay" class="loading-overlay hidden">
         <div class="spinner"></div>
-        <p id="loadingText">Processing...</p>
+        <p id="loadingText">جاري التحميل...</p>
     </div>
 
     <div id="toast" class="toast hidden"></div>
@@ -211,21 +62,21 @@
         <aside class="sidebar">
             <div class="brand">
                 <h1>NEO KIDS</h1>
-                <p class="doctor-name">Dr. Ahmed Mady</p>
+                <p class="doctor-name">د. أحمد ماضي</p>
                 <p class="specialty">Pediatrics & Neonatology</p>
             </div>
             <nav class="nav-menu">
-                <a href="#" class="nav-link active" data-target="dashboardSection"><i class="fa-solid fa-list-check"></i> <span>Queue</span></a>
-                <a href="#" class="nav-link" data-target="patientsSection"><i class="fa-solid fa-folder-open"></i> <span>Records</span></a>
+                <a href="#" class="nav-link active" data-target="dashboardSection"><i class="fa-solid fa-stethoscope"></i> العيادة (اليوم)</a>
+                <a href="#" class="nav-link" data-target="patientsSection"><i class="fa-solid fa-users"></i> سجل المرضى</a>
             </nav>
         </aside>
 
         <main class="main-content">
             <header class="top-header">
-                <h2 id="pageTitle">Clinical Queue</h2>
+                <h2 id="pageTitle">قائمة مرضى اليوم (مدمجة)</h2>
                 <div class="user-info">
-                    <span class="user-role">Workspace</span>
-                    <i class="fa-solid fa-user-doctor text-primary"></i>
+                    <span class="user-role">Dr. Ahmed Mady</span>
+                    <i class="fa-solid fa-user-doctor"></i>
                 </div>
             </header>
 
@@ -237,40 +88,41 @@
                         <div class="stat-card">
                             <div class="stat-icon waiting"><i class="fa-solid fa-hourglass-half"></i></div>
                             <div class="stat-info">
-                                <h3>Waiting</h3>
+                                <h3>في الانتظار</h3>
                                 <p id="dashWaitingCount">0</p>
                             </div>
                         </div>
                         <div class="stat-card">
                             <div class="stat-icon consultation"><i class="fa-solid fa-user-md"></i></div>
                             <div class="stat-info">
-                                <h3>In Encounter</h3>
+                                <h3>داخل الكشف</h3>
                                 <p id="dashConsultingCount">0</p>
                             </div>
                         </div>
                         <div class="stat-card">
-                            <div class="stat-icon completed"><i class="fa-solid fa-check-double"></i></div>
+                            <div class="stat-icon completed"><i class="fa-solid fa-check-circle"></i></div>
                             <div class="stat-info">
-                                <h3>Completed Today</h3>
+                                <h3>اكتملوا اليوم</h3>
                                 <p id="dashCompletedCount">0</p>
                             </div>
                         </div>
                     </div>
 
                     <div class="card">
-                        <div class="card-header">
-                            <h3>Active Patient Queue <button id="btnRefreshToday" class="btn-secondary btn-small"><i class="fa-solid fa-sync"></i> Refresh</button></h3>
+                        <div class="card-header d-flex justify-between align-center">
+                            <h3>غرفة الانتظار ومرضى اليوم (كافة الفروع)</h3>
+                            <button id="btnRefreshToday" class="btn-secondary btn-small"><i class="fa-solid fa-sync"></i> تحديث</button>
                         </div>
                         <div class="table-responsive">
                             <table class="data-table" id="todayTable">
                                 <thead>
                                     <tr>
-                                        <th>Time</th>
-                                        <th>MRN / Source</th>
-                                        <th>Patient Name</th>
-                                        <th>Reception Note</th>
-                                        <th>Status</th>
-                                        <th>Action</th>
+                                        <th>وقت الحجز</th>
+                                        <th>الرقم الطبي</th>
+                                        <th>اسم الطفل</th>
+                                        <th>الشكوى (الاستقبال)</th>
+                                        <th>الحالة</th>
+                                        <th>الإجراء</th>
                                     </tr>
                                 </thead>
                                 <tbody></tbody>
@@ -283,173 +135,163 @@
                 <section id="consultationSection" class="page-section hidden">
                     <div class="patient-header card">
                         <div class="patient-header-grid">
-                            <div style="grid-column: 1 / -1;">
-                                <small>Patient Name</small> 
-                                <strong id="phName" class="patient-name text-ar">--</strong>
-                            </div>
-                            <div><small>MRN</small> <strong id="phMRN">--</strong></div>
-                            <div><small>Age</small> <strong id="phAge">--</strong></div>
-                            <div><small>Gender</small> <strong id="phGender">--</strong></div>
-                            <div><small>DOB</small> <strong id="phDOB">--</strong></div>
-                            <div><small>Contact</small> <strong id="phPhone">--</strong></div>
+                            <div><small>اسم الطفل:</small> <strong id="phName" class="text-primary">--</strong></div>
+                            <div><small>الرقم الطبي:</small> <strong id="phMRN">--</strong></div>
+                            <div><small>العمر:</small> <strong id="phAge">--</strong></div>
+                            <div><small>النوع:</small> <strong id="phGender">--</strong></div>
+                            <div><small>تاريخ الميلاد:</small> <strong id="phDOB">--</strong></div>
+                            <div><small>رقم الهاتف:</small> <strong id="phPhone">--</strong></div>
                         </div>
                     </div>
 
-                    <div class="card">
-                        <div class="clinical-nav">
+                    <div class="workspace-grid">
+                        <div class="clinical-nav card">
                             <ul id="clinicalTabs">
-                                <li class="active" data-tab="tab-overview">Chief Complaint</li>
-                                <li data-tab="tab-exam">Vitals & Exam</li>
+                                <li class="active" data-tab="tab-overview">Overview & Complaint</li>
                                 <li data-tab="tab-history">Medical History</li>
-                                <li data-tab="tab-diagnosis">Assessment & Dx</li>
+                                <li data-tab="tab-exam">Examination & Vitals</li>
+                                <li data-tab="tab-diagnosis">Assessment / Diagnosis</li>
                                 <li data-tab="tab-meds">Medications (Rx)</li>
+                                <li data-tab="tab-investigations">Investigations & Files</li>
                                 <li data-tab="tab-plan">Plan & Follow-up</li>
-                                <li data-tab="tab-investigations">Files & Labs</li>
-                                <li data-tab="tab-previous">Past Encounters</li>
+                                <li data-tab="tab-previous">Previous Visits</li>
                             </ul>
                         </div>
 
-                        <div class="clinical-content">
+                        <div class="clinical-content card">
                             <form id="visitForm">
                                 <!-- Tab: Overview -->
                                 <div id="tab-overview" class="tab-pane active">
-                                    <h3 class="section-title">Encounter Context</h3>
-                                    <div class="form-group full-width text-ar">
-                                        <label>Chief Complaint (CC)</label>
-                                        <textarea id="visitComplaint" rows="2" placeholder="الشكوى الرئيسية..."></textarea>
-                                        <small class="text-muted" id="receptionComplaintNote">Reception Note: <span></span></small>
+                                    <h3 class="section-title">Chief Complaint</h3>
+                                    <div class="form-group full-width">
+                                        <textarea id="visitComplaint" rows="3" placeholder="أعراض المريض الرئيسية..."></textarea>
+                                        <small class="text-muted" id="receptionComplaintNote">شكوى الاستقبال: <span></span></small>
                                     </div>
-                                    <div class="form-group full-width mt-20 text-ar">
-                                        <label>History of Present Illness (HPI)</label>
-                                        <textarea id="hpi" rows="4" placeholder="تاريخ المرض الحالي وتطور الأعراض..."></textarea>
+                                    <h3 class="section-title mt-20">Vitals Snapshot (اختياري)</h3>
+                                    <div class="form-grid">
+                                        <div class="form-group"><label>Temp (°C)</label><input type="number" step="0.1" id="vTemp"></div>
+                                        <div class="form-group"><label>Weight (Kg)</label><input type="number" step="0.01" id="vWeight"></div>
+                                        <div class="form-group"><label>Height (cm)</label><input type="number" step="0.1" id="vHeight"></div>
+                                        <div class="form-group"><label>SpO2 (%)</label><input type="number" id="vSpo2"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Tab: History -->
+                                <div id="tab-history" class="tab-pane hidden">
+                                    <h3 class="section-title">History of Present Illness</h3>
+                                    <div class="form-group full-width">
+                                        <textarea id="hpi" rows="4"></textarea>
+                                    </div>
+                                    <h3 class="section-title mt-20">Neonatal & Birth History</h3>
+                                    <div class="form-grid">
+                                        <div class="form-group"><label>Gestational Age</label><input type="text" id="histGestational"></div>
+                                        <div class="form-group"><label>Mode of Delivery</label><select id="histDelivery"><option value="">Select...</option><option value="NVD">NVD</option><option value="CS">CS</option></select></div>
+                                        <div class="form-group"><label>Birth Weight (Kg)</label><input type="number" step="0.1" id="histBirthWeight"></div>
+                                        <div class="form-group"><label>NICU Admission</label><input type="text" id="histNICU"></div>
+                                    </div>
+                                    <h3 class="section-title mt-20">Past & Family History</h3>
+                                    <div class="form-group full-width">
+                                        <textarea id="histPastFamily" rows="3"></textarea>
                                     </div>
                                 </div>
 
                                 <!-- Tab: Examination -->
                                 <div id="tab-exam" class="tab-pane hidden">
-                                    <h3 class="section-title">Anthropometrics & Vital Signs</h3>
+                                    <h3 class="section-title">General Examination</h3>
+                                    <div class="form-group full-width">
+                                        <textarea id="examGeneral" rows="3" placeholder="Consciousness, Hydration, Pallor, Jaundice, etc..."></textarea>
+                                    </div>
+                                    <h3 class="section-title mt-20">Systemic Examination</h3>
                                     <div class="form-grid">
-                                        <div class="form-group"><label>Weight (kg)</label><input type="number" step="0.01" id="vWeight"></div>
-                                        <div class="form-group"><label>Length/Height (cm)</label><input type="number" step="0.1" id="vHeight"></div>
-                                        <div class="form-group"><label>Head Circ. (cm)</label><input type="number" step="0.1" id="vHc" placeholder="HC"></div>
-                                        <div class="form-group"><label>Temp (°C)</label><input type="number" step="0.1" id="vTemp"></div>
-                                        <div class="form-group"><label>SpO2 (%)</label><input type="number" id="vSpo2"></div>
-                                    </div>
-                                    <h3 class="section-title mt-20">Physical Examination</h3>
-                                    <div class="form-group full-width text-ar">
-                                        <label>General Appearance</label>
-                                        <textarea id="examGeneral" rows="2" placeholder="Conscious, active, well-hydrated, no distress..."></textarea>
-                                    </div>
-                                    <div class="form-grid mt-10 text-ar">
-                                        <div class="form-group full-width"><label>Respiratory / Chest</label><input type="text" id="examResp"></div>
+                                        <div class="form-group full-width"><label>Respiratory (Chest)</label><input type="text" id="examResp"></div>
                                         <div class="form-group full-width"><label>Cardiovascular (CVS)</label><input type="text" id="examCVS"></div>
                                         <div class="form-group full-width"><label>Abdomen / GI</label><input type="text" id="examAbd"></div>
                                         <div class="form-group full-width"><label>Neurological / ENT / Skin</label><input type="text" id="examNeuro"></div>
                                     </div>
                                 </div>
 
-                                <!-- Tab: History -->
-                                <div id="tab-history" class="tab-pane hidden">
-                                    <h3 class="section-title">Birth & Neonatal History</h3>
-                                    <div class="form-grid">
-                                        <div class="form-group"><label>Gestational Age</label><input type="text" id="histGestational" placeholder="e.g. 38 weeks"></div>
-                                        <div class="form-group"><label>Mode of Delivery</label><select id="histDelivery"><option value="">Select...</option><option value="NVD">Normal Vaginal (NVD)</option><option value="CS">Cesarean (CS)</option></select></div>
-                                        <div class="form-group"><label>Birth Weight (kg)</label><input type="number" step="0.1" id="histBirthWeight"></div>
-                                        <div class="form-group"><label>NICU Admission</label><input type="text" id="histNICU" placeholder="Duration & Indication"></div>
-                                    </div>
-                                    <h3 class="section-title mt-20">Past Medical, Allergy & Family History</h3>
-                                    <div class="form-group full-width text-ar">
-                                        <textarea id="histPastFamily" rows="3" placeholder="تاريخ مرضي سابق، حساسية أدوية، وتاريخ عائلي..."></textarea>
-                                    </div>
-                                </div>
-
                                 <!-- Tab: Diagnosis -->
                                 <div id="tab-diagnosis" class="tab-pane hidden">
-                                    <h3 class="section-title">Clinical Assessment</h3>
-                                    <div class="form-group full-width text-ar">
-                                        <label>Primary Diagnosis <span class="text-danger">*</span></label>
-                                        <input type="text" id="diagPrimary" required placeholder="التشخيص الأساسي (مثال: Acute Tonsillitis)">
+                                    <h3 class="section-title">Assessment & Diagnosis</h3>
+                                    <div class="form-group full-width">
+                                        <label>Primary Diagnosis</label>
+                                        <input type="text" id="diagPrimary" required placeholder="مثال: Acute Tonsillitis">
                                     </div>
-                                    <div class="form-group full-width mt-10 text-ar">
-                                        <label>Secondary / Differential Diagnoses</label>
+                                    <div class="form-group full-width mt-10">
+                                        <label>Secondary / Other Diagnoses</label>
                                         <textarea id="diagSecondary" rows="2"></textarea>
                                     </div>
                                 </div>
 
                                 <!-- Tab: Medications -->
                                 <div id="tab-meds" class="tab-pane hidden">
-                                    <h3 class="section-title">Prescription (Rx)</h3>
-                                    <div class="card" style="box-shadow:none; background:var(--bg-color);">
-                                        <div class="card-header" style="background:transparent; border:none; padding-bottom:0;"><strong>Add Medication</strong></div>
-                                        <div class="form-grid" style="padding: 16px;">
+                                    <h3 class="section-title">Current Prescription (Rx)</h3>
+                                    <div class="med-adder card">
+                                        <div class="form-grid">
                                             <div class="form-group full-width"><label>Medication Name</label><input type="text" id="medName" placeholder="e.g. Amoxicillin 250mg/5ml"></div>
-                                            <div class="form-group"><label>Dose & Freq</label><input type="text" id="medDose" class="text-ar" placeholder="5ml every 8 hours"></div>
-                                            <div class="form-group"><label>Duration</label><input type="text" id="medDuration" class="text-ar" placeholder="5 days"></div>
-                                            <div class="form-group full-width"><label>Instructions</label><input type="text" id="medNotes" class="text-ar" placeholder="بعد الأكل"></div>
-                                            <div class="form-group full-width">
-                                                <button type="button" id="btnAddMed" class="btn-secondary"><i class="fa-solid fa-plus"></i> Add to Prescription</button>
-                                            </div>
+                                            <div class="form-group"><label>Dose & Freq</label><input type="text" id="medDose" placeholder="e.g. 5ml every 8 hours"></div>
+                                            <div class="form-group"><label>Duration</label><input type="text" id="medDuration" placeholder="e.g. 5 days"></div>
+                                            <div class="form-group full-width"><label>Notes</label><input type="text" id="medNotes" placeholder="e.g. بعد الأكل"></div>
                                         </div>
+                                        <button type="button" id="btnAddMed" class="btn-secondary mt-10"><i class="fa-solid fa-plus"></i> Add Medication</button>
                                     </div>
                                     
                                     <div class="table-responsive mt-20">
                                         <table class="data-table" id="medsTable">
-                                            <thead><tr><th>Medication</th><th>Dose</th><th>Duration</th><th>Instructions</th><th>Action</th></tr></thead>
+                                            <thead><tr><th>Medication</th><th>Dose & Freq</th><th>Duration</th><th>Notes</th><th>Action</th></tr></thead>
                                             <tbody></tbody>
                                         </table>
                                     </div>
                                 </div>
 
+                                <!-- Tab: Investigations & Files -->
+                                <div id="tab-investigations" class="tab-pane hidden">
+                                    <h3 class="section-title">Requested / Performed Investigations</h3>
+                                    <div class="form-group full-width">
+                                        <textarea id="invText" rows="3" placeholder="e.g. CBC, CRP, Stool analysis..."></textarea>
+                                    </div>
+                                    <h3 class="section-title mt-20">Upload Files (Labs, X-Rays)</h3>
+                                    <div class="form-group">
+                                        <input type="file" id="fileUpload" accept="image/*,application/pdf">
+                                        <button type="button" id="btnUploadFile" class="btn-secondary mt-10"><i class="fa-solid fa-upload"></i> Upload</button>
+                                        <small id="uploadStatus" class="text-primary hidden">جاري الرفع...</small>
+                                    </div>
+                                    <ul id="filesList" class="mt-10 file-list"></ul>
+                                </div>
+
                                 <!-- Tab: Plan & Follow-up -->
                                 <div id="tab-plan" class="tab-pane hidden">
-                                    <h3 class="section-title">Management & Instructions</h3>
-                                    <div class="form-group full-width text-ar">
-                                        <label>Treatment Plan & Parental Advice</label>
-                                        <textarea id="planNotes" rows="4" placeholder="تعليمات التغذية والعناية..."></textarea>
+                                    <h3 class="section-title">Medical Notes & Treatment Plan</h3>
+                                    <div class="form-group full-width">
+                                        <textarea id="planNotes" rows="4"></textarea>
                                     </div>
-                                    <h3 class="section-title mt-20">Follow-up Plan</h3>
+                                    <h3 class="section-title mt-20">Follow-up</h3>
                                     <div class="form-grid">
                                         <div class="form-group">
-                                            <label>Follow-up Requirement</label>
+                                            <label>Decision</label>
                                             <select id="planFollowupDecision">
-                                                <option value="None">PRN / As needed</option>
-                                                <option value="Required">Routine Follow-up Required</option>
+                                                <option value="None">No follow-up needed</option>
+                                                <option value="Required">Follow-up Required</option>
                                             </select>
                                         </div>
                                         <div class="form-group">
-                                            <label>Scheduled Date</label>
+                                            <label>Date (Optional)</label>
                                             <input type="date" id="planFollowupDate">
                                         </div>
                                     </div>
                                 </div>
 
-                                <!-- Tab: Investigations & Files -->
-                                <div id="tab-investigations" class="tab-pane hidden">
-                                    <h3 class="section-title">Investigations & Imaging</h3>
-                                    <div class="form-group full-width text-ar">
-                                        <label>Requested / Reviewed Labs</label>
-                                        <textarea id="invText" rows="3" placeholder="CBC, CRP, etc..."></textarea>
-                                    </div>
-                                    <h3 class="section-title mt-20">Chart Attachments</h3>
-                                    <div class="form-group">
-                                        <input type="file" id="fileUpload" accept="image/*,application/pdf">
-                                        <button type="button" id="btnUploadFile" class="btn-secondary mt-10"><i class="fa-solid fa-cloud-arrow-up"></i> Upload Document</button>
-                                        <small id="uploadStatus" class="text-primary hidden font-weight-bold">Uploading...</small>
-                                    </div>
-                                    <ul id="filesList" class="mt-10" style="list-style:none; display:flex; flex-direction:column; gap:8px;"></ul>
-                                </div>
-
                                 <!-- Tab: Previous Visits -->
                                 <div id="tab-previous" class="tab-pane hidden">
-                                    <h3 class="section-title">Encounter History</h3>
-                                    <div id="previousVisitsContainer" style="display:flex; flex-direction:column; gap:16px;"></div>
+                                    <h3 class="section-title">Patient Medical History</h3>
+                                    <div id="previousVisitsContainer" class="timeline"></div>
                                 </div>
                             </form>
 
-                            <div class="consultation-actions">
-                                <button type="button" id="btnSaveDraft" class="btn-secondary"><i class="fa-solid fa-floppy-disk"></i> Save Draft</button>
+                            <div class="consultation-actions mt-20">
+                                <button type="button" id="btnSaveDraft" class="btn-secondary"><i class="fa-solid fa-save"></i> Save Draft</button>
                                 <button type="button" id="btnPrintRx" class="btn-secondary"><i class="fa-solid fa-print"></i> Print Rx</button>
-                                <button type="button" id="btnCompleteVisit" class="btn-primary"><i class="fa-solid fa-check-double"></i> Complete Encounter</button>
+                                <button type="button" id="btnCompleteVisit" class="btn-primary"><i class="fa-solid fa-check-double"></i> Complete Consultation</button>
                             </div>
                         </div>
                     </div>
@@ -458,35 +300,40 @@
         </main>
     </div>
 
-    <!-- Print Area (Preserved logic for app integration) -->
+    <!-- Print Area -->
     <div id="printArea" class="print-only">
-        <div class="rx-header text-ar" style="text-align:center; margin-bottom: 20px;">
-            <h2>NEO KIDS CLINIC</h2>
-            <h3>د. أحمد ماضي عبد الحميد</h3>
-            <p>أخصائي طب الأطفال وحديثي الولادة</p>
-            <hr style="margin-top:10px;">
+        <div class="rx-header">
+            <h2>NEO KIDS</h2>
+            <h3>د. أحمد ماضي / Dr. Ahmed Mady</h3>
+            <p>Pediatrics & Neonatology | أخصائي طب الأطفال وحديثي الولادة</p>
+            <hr>
         </div>
-        <div class="rx-patient-info text-ar" style="display:flex; justify-content:space-between; margin-bottom: 20px; font-size:14px;">
-            <p><strong>الاسم:</strong> <span id="rxName"></span></p>
-            <p><strong>العمر:</strong> <span id="rxAge"></span></p>
-            <p><strong>التاريخ:</strong> <span id="rxDate"></span></p>
+        <div class="rx-patient-info">
+            <p><strong>Name:</strong> <span id="rxName"></span></p>
+            <p><strong>Age:</strong> <span id="rxAge"></span></p>
+            <p><strong>Date:</strong> <span id="rxDate"></span></p>
         </div>
         <div class="rx-body">
-            <h1 style="font-size:3rem; margin-bottom:10px;">℞</h1>
-            <table id="rxTable" style="width:100%; text-align:right;" class="text-ar">
+            <h1 class="rx-symbol">℞</h1>
+            <table id="rxTable">
                 <tbody></tbody>
             </table>
-            <div id="rxNotes" class="mt-20 text-ar" style="margin-top:30px; font-style:italic;"></div>
-            <div id="rxNextVisit" class="mt-20 text-ar" style="margin-top:20px; font-weight:bold;"></div>
+            <div id="rxNotes" class="mt-20"></div>
+            <div id="rxNextVisit" class="mt-20"></div>
+        </div>
+        <div class="rx-footer">
+            <hr>
+            <p>العنوان: عيادة نيو كيدز - الشرقية</p>
         </div>
     </div>
 
-    <!-- Embedded Application Script (Preserved Integration) -->
+    <!-- السكريبت المدمج -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
         import { getFirestore, collection, addDoc, getDocs, getDoc, doc, query, where, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
         import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-storage.js";
 
+        // إعدادات Firebase الخاصة بك
         const firebaseConfig = {
             apiKey: "AIzaSyDJ2PMemkLDrVWS2PMH9z7glG-yK0QDNsg",
             authDomain: "friends-clinic.firebaseapp.com",
@@ -501,17 +348,21 @@
         const storage = getStorage(app);
 
         function showSection(sectionId) {
-            document.querySelectorAll('.page-section').forEach(sec => sec.classList.add('hidden'));
+            document.querySelectorAll('.page-section').forEach(sec => {
+                sec.classList.add('hidden');
+                sec.classList.remove('active');
+            });
             document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
             
             const target = document.getElementById(sectionId);
-            if(target) target.classList.remove('hidden');
-            
+            if(target) {
+                target.classList.remove('hidden');
+                target.classList.add('active');
+            }
             const activeLink = document.querySelector(`[data-target="${sectionId}"]`);
             if(activeLink) activeLink.classList.add('active');
             
-            document.getElementById('pageTitle').innerText = sectionId === 'dashboardSection' ? 'Clinical Queue' : 'Clinical Encounter';
-            window.scrollTo(0,0);
+            document.getElementById('pageTitle').innerText = sectionId === 'dashboardSection' ? 'قائمة مرضى اليوم' : 'الملف الطبي (الكشف)';
         }
 
         function setupTabs() {
@@ -520,16 +371,21 @@
                     document.querySelectorAll('#clinicalTabs li').forEach(t => t.classList.remove('active'));
                     e.currentTarget.classList.add('active');
                     
-                    document.querySelectorAll('.tab-pane').forEach(p => p.classList.add('hidden'));
-                    const targetPane = document.getElementById(e.currentTarget.getAttribute('data-tab'));
-                    if(targetPane) targetPane.classList.remove('hidden');
+                    document.querySelectorAll('.tab-pane').forEach(p => {
+                        p.classList.add('hidden');
+                        p.classList.remove('active');
+                    });
                     
-                    e.currentTarget.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                    const targetPane = document.getElementById(e.currentTarget.getAttribute('data-tab'));
+                    if(targetPane) {
+                        targetPane.classList.remove('hidden');
+                        targetPane.classList.add('active');
+                    }
                 });
             });
         }
 
-        function showLoading(text = "Processing...") {
+        function showLoading(text = "جاري المعالجة...") {
             document.getElementById('loadingText').innerText = text;
             document.getElementById('loadingOverlay').classList.remove('hidden');
         }
@@ -541,9 +397,9 @@
         function showToast(message, type = "success") {
             const toast = document.getElementById('toast');
             toast.innerText = message;
-            toast.style.backgroundColor = type === "success" ? "var(--success)" : "var(--danger)";
+            toast.style.backgroundColor = type === "success" ? "var(--primary-color)" : "#ef4444";
             toast.classList.remove('hidden');
-            setTimeout(() => toast.classList.add('hidden'), 3500);
+            setTimeout(() => toast.classList.add('hidden'), 3000);
         }
 
         function getTodayStr() {
@@ -551,30 +407,15 @@
             return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
         }
 
-        // Updated Age Calculation for Pediatrics (Days for newborns, Months for infants)
         function calculateAge(dobStr) {
             if (!dobStr) return '--';
             const dob = new Date(dobStr);
-            const today = new Date();
-            
-            let y = today.getFullYear() - dob.getFullYear();
-            let m = today.getMonth() - dob.getMonth();
-            let d = today.getDate() - dob.getDate();
-
-            if (d < 0) {
-                m--;
-                d += new Date(today.getFullYear(), today.getMonth(), 0).getDate();
-            }
-            if (m < 0) {
-                y--;
-                m += 12;
-            }
-
-            if (y > 0) return `${y}y ${m > 0 ? m + 'm' : ''}`;
-            if (m > 0) return `${m}m ${d > 0 ? d + 'd' : ''}`;
-            return `${d} days`;
+            const diffMs = Date.now() - dob.getTime();
+            const ageDt = new Date(diffMs);
+            return Math.abs(ageDt.getUTCFullYear() - 1970) + " سنة";
         }
 
+        // --- جلب حالات العيادتين معاً ---
         async function getMergedAppointments(dateStr) {
             let apps = [];
             try {
@@ -586,7 +427,7 @@
             try {
                 const q2 = query(collection(db, "friends_appointments"), where("date", "==", dateStr));
                 const snap2 = await getDocs(q2);
-                snap2.forEach(doc => apps.push({ id: doc.id, appCol: 'friends_appointments', patCol: 'friends_patients', sourceName: 'Al-Asdiqaa', ...doc.data() }));
+                snap2.forEach(doc => apps.push({ id: doc.id, appCol: 'friends_appointments', patCol: 'friends_patients', sourceName: 'مجمع الأصدقاء', ...doc.data() }));
             } catch(e) { console.error(e); }
             return apps;
         }
@@ -664,7 +505,7 @@
             document.getElementById('btnRefreshToday').addEventListener('click', loadDashboard);
 
             async function loadDashboard() {
-                showLoading("Loading clinic queue...");
+                showLoading("جاري تحميل العيادة...");
                 try {
                     const apps = await getMergedAppointments(getTodayStr());
                     const tbody = document.querySelector('#todayTable tbody');
@@ -687,21 +528,24 @@
                                 data-mrn="${app.mrn}" 
                                 data-complaint="${encodeURIComponent(app.complaint || '')}" 
                                 data-appcol="${app.appCol}" 
-                                data-patcol="${app.patCol}"><i class="fa-solid fa-stethoscope"></i> Open Chart</button>`;
+                                data-patcol="${app.patCol}">Start / Resume</button>`;
                         } else if (app.status === 'Completed') {
-                            actionBtn = `<span class="text-muted"><i class="fa-solid fa-check"></i> Completed</span>`;
+                            actionBtn = `<span class="text-muted">Completed</span>`;
                         }
+
+                        let badgeClass = app.status === 'In Consultation' ? 'consultation' : 
+                                         (app.status === 'Completed' ? 'completed' : 'waiting');
 
                         let sourceTag = app.sourceName === 'NEO KIDS' 
                             ? '<span class="source-badge source-neo">NEO KIDS</span>' 
-                            : '<span class="source-badge source-frnd">Al-Asdiqaa</span>';
+                            : '<span class="source-badge source-frnd">مجمع الأصدقاء</span>';
 
                         tr.innerHTML = `
                             <td>${app.time}</td>
                             <td><strong>${app.mrn}</strong><br>${sourceTag}</td>
-                            <td class="text-ar"><strong>${app.patientName}</strong></td>
-                            <td class="text-ar text-muted">${app.complaint || '-'}</td>
-                            <td><span class="badge ${app.status.replace(' ', '.')}">${app.status}</span></td>
+                            <td>${app.patientName}</td>
+                            <td>${app.complaint || '-'}</td>
+                            <td><span class="badge ${badgeClass}">${app.status}</span></td>
                             <td>${actionBtn}</td>
                         `;
                         tbody.appendChild(tr);
@@ -720,13 +564,13 @@
 
                 } catch (e) {
                     console.error(e);
-                    showToast("Error loading appointments", "error");
+                    showToast("خطأ في جلب بيانات اليوم", "error");
                 }
                 hideLoading();
             }
 
             window.startConsultation = async (appId, patientId, mrn, encodedComplaint, appCol, patCol) => {
-                showLoading("Preparing patient chart...");
+                showLoading("تجهيز الملف الطبي...");
                 try {
                     const receptionComplaint = decodeURIComponent(encodedComplaint);
                     
@@ -742,19 +586,18 @@
                     document.getElementById('phName').innerText = patient.fullName;
                     document.getElementById('phMRN').innerText = mrn;
                     document.getElementById('phAge').innerText = calculateAge(patient.dob);
-                    document.getElementById('phGender').innerText = patient.gender === 'Male' ? 'Male' : 'Female';
+                    document.getElementById('phGender').innerText = patient.gender === 'Male' ? 'ذكر' : 'أنثى';
                     document.getElementById('phDOB').innerText = patient.dob;
                     document.getElementById('phPhone').innerText = patient.phone;
 
                     document.getElementById('visitForm').reset();
-                    document.getElementById('receptionComplaintNote').querySelector('span').innerText = receptionComplaint || 'None';
+                    document.getElementById('receptionComplaintNote').querySelector('span').innerText = receptionComplaint || 'لا توجد';
                     
                     if (visit.chiefComplaint) document.getElementById('visitComplaint').value = visit.chiefComplaint;
                     if (visit.vitals) {
                         document.getElementById('vTemp').value = visit.vitals.temp || '';
                         document.getElementById('vWeight').value = visit.vitals.weight || '';
                         document.getElementById('vHeight').value = visit.vitals.height || '';
-                        document.getElementById('vHc').value = visit.vitals.hc || '';
                         document.getElementById('vSpo2').value = visit.vitals.spo2 || '';
                     }
                     if (visit.history) {
@@ -789,7 +632,7 @@
                     document.querySelector('[data-tab="tab-overview"]').click();
                 } catch (e) {
                     console.error(e);
-                    showToast("Failed to open chart", "error");
+                    showToast("حدث خطأ في فتح الملف", "error");
                 }
                 hideLoading();
             };
@@ -800,7 +643,7 @@
                 const duration = document.getElementById('medDuration').value.trim();
                 const notes = document.getElementById('medNotes').value.trim();
 
-                if(!name) { showToast("Medication name is required", "error"); return; }
+                if(!name) { showToast("يرجى كتابة اسم الدواء", "error"); return; }
 
                 currentMedications.push({ name, dose, duration, notes });
                 renderMedicationsTable();
@@ -823,10 +666,10 @@
                     tbody.innerHTML += `
                         <tr>
                             <td><strong>${med.name}</strong></td>
-                            <td class="text-ar">${med.dose}</td>
-                            <td class="text-ar">${med.duration}</td>
-                            <td class="text-ar">${med.notes}</td>
-                            <td><button type="button" class="btn-secondary btn-small" onclick="window.removeMed(${i})"><i class="fa-solid fa-trash text-danger"></i></button></td>
+                            <td>${med.dose}</td>
+                            <td>${med.duration}</td>
+                            <td>${med.notes}</td>
+                            <td><button type="button" class="btn-secondary btn-small" onclick="window.removeMed(${i})"><i class="fa-solid fa-trash"></i></button></td>
                         </tr>
                     `;
                 });
@@ -839,7 +682,6 @@
                         temp: document.getElementById('vTemp').value,
                         weight: document.getElementById('vWeight').value,
                         height: document.getElementById('vHeight').value,
-                        hc: document.getElementById('vHc').value,
                         spo2: document.getElementById('vSpo2').value
                     },
                     history: {
@@ -872,31 +714,31 @@
             }
 
             document.getElementById('btnSaveDraft').addEventListener('click', async () => {
-                showLoading("Saving draft...");
+                showLoading("جاري الحفظ...");
                 try {
                     const data = buildVisitDataObject();
                     await saveVisitData(currentVisitId, data, false);
-                    showToast("Draft saved successfully");
-                } catch(e) { showToast("Error saving draft", "error"); }
+                    showToast("تم الحفظ كمسودة بنجاح");
+                } catch(e) { showToast("خطأ في الحفظ", "error"); }
                 hideLoading();
             });
 
             document.getElementById('btnCompleteVisit').addEventListener('click', async () => {
                 if(!document.getElementById('diagPrimary').value) {
-                    showToast("Primary Diagnosis is required", "error");
+                    showToast("يجب إدخال التشخيص الأساسي (Primary Diagnosis)", "error");
                     document.querySelector('[data-tab="tab-diagnosis"]').click();
                     return;
                 }
 
-                if(confirm("Are you sure you want to complete this encounter?")) {
-                    showLoading("Completing encounter...");
+                if(confirm("تأكيد إنهاء الكشف الطبي؟")) {
+                    showLoading("جاري إنهاء الكشف...");
                     try {
                         const data = buildVisitDataObject();
                         await saveVisitData(currentVisitId, data, true);
-                        showToast("Encounter completed");
+                        showToast("تم إنهاء الكشف بنجاح");
                         showSection('dashboardSection');
                         loadDashboard();
-                    } catch(e) { showToast("Error", "error"); }
+                    } catch(e) { showToast("خطأ", "error"); }
                     hideLoading();
                 }
             });
@@ -910,46 +752,40 @@
                 rxTbody.innerHTML = '';
                 currentMedications.forEach(med => {
                     rxTbody.innerHTML += `<tr>
-                        <td style="padding: 10px 0; border-bottom: 1px dashed #ccc;">
-                            <strong style="font-size:1.1em; color:var(--navy);">${med.name}</strong><br>
-                            <span style="font-size:0.9em;">${med.dose} - ${med.duration}</span><br>
-                            <i style="font-size:0.85em; color:#555;">${med.notes}</i>
-                        </td>
+                        <td><strong>${med.name}</strong><br><small>${med.dose} - ${med.duration}</small><br><i>${med.notes}</i></td>
                     </tr>`;
                 });
                 
                 document.getElementById('rxNotes').innerText = document.getElementById('planNotes').value;
                 const fDecision = document.getElementById('planFollowupDecision').value;
                 const fDate = document.getElementById('planFollowupDate').value;
-                document.getElementById('rxNextVisit').innerHTML = fDecision === 'Required' && fDate ? `Follow-up / الاستشارة: ${fDate}` : '';
+                document.getElementById('rxNextVisit').innerHTML = fDecision === 'Required' && fDate ? `<strong>الاستشارة / الإعادة:</strong> ${fDate}` : '';
 
                 window.print();
             });
 
             async function loadPreviousVisits() {
                 const container = document.getElementById('previousVisitsContainer');
-                container.innerHTML = '<p class="text-muted">Loading chart history...</p>';
+                container.innerHTML = '<p>جاري تحميل التاريخ المرضي...</p>';
                 try {
                     const visits = await getPreviousVisits(currentPatientId, currentVisitId);
                     if(visits.length === 0) {
-                        container.innerHTML = '<p class="text-muted" style="padding:16px; background:#f8fafc; border-radius:8px;">No previous completed encounters.</p>';
+                        container.innerHTML = '<p style="color:var(--text-muted)">لا توجد زيارات سابقة مكتملة.</p>';
                         return;
                     }
                     
                     container.innerHTML = '';
                     visits.forEach(v => {
-                        const diag = v.diagnoses?.primary || 'Unspecified';
-                        const dateStr = new Date(v.createdAt?.toDate() || Date.now()).toLocaleDateString();
+                        const diag = v.diagnoses?.primary || 'غير مسجل';
+                        const dateStr = new Date(v.createdAt?.toDate() || Date.now()).toLocaleDateString('ar-EG');
                         container.innerHTML += `
-                            <div style="border:1px solid var(--border-color); padding:16px; border-radius:8px; background:var(--card-bg);">
-                                <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
-                                    <strong class="text-primary">${dateStr}</strong>
-                                </div>
-                                <p><strong>Diagnosis:</strong> <span class="text-ar">${diag}</span></p>
-                                <p class="text-muted mt-10"><strong style="color:var(--slate);">Complaint:</strong> <span class="text-ar">${v.chiefComplaint || '-'}</span></p>
+                            <div style="border:1px solid #ddd; padding:15px; margin-bottom:10px; border-radius:8px;">
+                                <strong>${dateStr}</strong>
+                                <p style="color:var(--primary-color); margin-top:5px;"><strong>التشخيص:</strong> ${diag}</p>
+                                <p><small><strong>الشكوى:</strong> ${v.chiefComplaint || '-'}</small></p>
                             </div>`;
                     });
-                } catch(e) { container.innerHTML = '<p class="text-danger">Error loading history.</p>'; }
+                } catch(e) { container.innerHTML = '<p>خطأ في التحميل.</p>'; }
             }
 
             document.getElementById('btnUploadFile').addEventListener('click', async () => {
@@ -959,23 +795,23 @@
 
                 const statusLabel = document.getElementById('uploadStatus');
                 statusLabel.classList.remove('hidden');
-                statusLabel.innerText = "Uploading 0%";
+                statusLabel.innerText = "جاري الرفع 0%";
 
                 try {
                     const meta = await uploadMedicalFile(file, currentPatientId, currentVisitId, (prog) => {
-                        statusLabel.innerText = `Uploading ${Math.round(prog)}%`;
+                        statusLabel.innerText = `جاري الرفع ${Math.round(prog)}%`;
                     });
                     
-                    statusLabel.innerText = "Uploaded successfully!";
+                    statusLabel.innerText = "تم الرفع بنجاح!";
                     const li = document.createElement('li');
-                    li.style.cssText = "background:#f1f5f9; padding:8px 12px; border-radius:8px; display:flex; justify-content:space-between; align-items:center;";
-                    li.innerHTML = `<span><i class="fa-solid fa-file-medical text-primary"></i> ${meta.fileName}</span> <a href="${meta.downloadURL}" target="_blank" style="color:var(--primary); text-decoration:none; font-weight:600;">View</a>`;
+                    li.innerHTML = `<span><i class="fa-solid fa-file-medical"></i> ${meta.fileName}</span> <a href="${meta.downloadURL}" target="_blank" style="margin-right:10px; color:var(--primary-color);">عرض</a>`;
                     document.getElementById('filesList').appendChild(li);
                     fileInput.value = "";
                     setTimeout(()=> statusLabel.classList.add('hidden'), 3000);
-                } catch(e) { statusLabel.innerText = "Upload failed."; }
+                } catch(e) { statusLabel.innerText = "فشل الرفع."; }
             });
 
+            // بدء التشغيل
             loadDashboard();
         });
     </script>
