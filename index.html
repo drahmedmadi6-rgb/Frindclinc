@@ -595,9 +595,18 @@
                 tab.addEventListener('click', (e) => {
                     document.querySelectorAll('#clinicalTabs li').forEach(t => t.classList.remove('active'));
                     e.currentTarget.classList.add('active');
-                    document.querySelectorAll('.tab-pane').forEach(p => p.classList.add('hidden'));
+                    
+                    document.querySelectorAll('.tab-pane').forEach(p => {
+                        p.classList.add('hidden');
+                        p.classList.remove('active'); // إزالة التنشيط من الباقي
+                    });
+                    
                     const targetPane = document.getElementById(e.currentTarget.getAttribute('data-tab'));
-                    if(targetPane) targetPane.classList.remove('hidden');
+                    if(targetPane) {
+                        targetPane.classList.remove('hidden');
+                        targetPane.classList.add('active'); // إضافة التنشيط للتبويب المختار ليظهر
+                    }
+                    
                     e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
                 });
             });
