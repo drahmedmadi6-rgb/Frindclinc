@@ -150,7 +150,6 @@
         }
 
         @media (max-width: 768px) {
-            /* 1. إصلاح جذري لعرض الشاشة ومنع الخروج عن الحواف */
             html, body { 
                 overflow-x: hidden !important; 
                 width: 100% !important; 
@@ -166,9 +165,8 @@
                 overflow-x: hidden !important;
             }
             
-            /* 2. إلغاء أي هوامش قادمة من doctor.css كانت تدفع المحتوى لليسار */
             .main-content { 
-                margin: 0 !important; /* هذا السطر يحل مشكلة الفراغ الأبيض يمين الشاشة */
+                margin: 0 !important; 
                 margin-bottom: calc(75px + var(--safe-area-bottom)) !important; 
                 padding: 10px !important; 
                 width: 100% !important; 
@@ -177,17 +175,15 @@
                 overflow-x: hidden !important;
             } 
 
-            /* 3. إجبار الكروت على احترام حجم الشاشة */
             .card {
                 width: 100% !important;
                 max-width: 100% !important;
                 box-sizing: border-box !important;
                 margin-left: 0 !important;
                 margin-right: 0 !important;
-                overflow: hidden !important; /* لمنع الجداول من تدمير العرض */
+                overflow: hidden !important; 
             }
             
-            /* تحويل القائمة الجانبية لشريط سفلي */
             .sidebar { 
                 width: 100% !important; 
                 height: calc(65px + var(--safe-area-bottom)) !important; 
@@ -205,7 +201,6 @@
             .nav-link.active { border-right: none !important; border-top-color: var(--primary-color) !important; background: rgba(255,255,255,0.05) !important; }
             .nav-link i { font-size: 1.2rem !important; margin: 0 !important; }
 
-            /* ترتيب الهيدر */
             header.top-header { flex-wrap: wrap !important; gap: 10px !important; margin-bottom: 15px !important; justify-content: space-between !important; width: 100% !important; box-sizing: border-box !important; }
             header.top-header h2 { font-size: 1.2rem !important; margin: 0 !important; }
             .user-info { font-size: 0.85rem !important; padding: 6px 10px !important; }
@@ -216,7 +211,6 @@
             .card-header { flex-direction: column !important; align-items: flex-start !important; gap: 12px !important; }
             .card-header button { width: 100% !important; }
 
-            /* تحويل التبويبات الطبية لتمرير أفقي */
             .clinical-nav { width: 100% !important; overflow: hidden !important; padding: 0 !important; }
             .clinical-nav ul { 
                 flex-direction: row !important; 
@@ -248,7 +242,6 @@
             .consultation-actions-container { flex-direction: column !important; gap: 12px !important; width: 100% !important; }
             .consultation-actions-container button { width: 100% !important; padding: 14px !important; font-size: 1rem !important; flex: none !important; }
             
-            /* تأمين الجداول */
             .table-responsive { width: 100% !important; overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; margin: 0 !important; }
             .data-table { min-width: 600px !important; }
             .data-table th, .data-table td { padding: 10px 8px !important; font-size: 0.9rem !important; }
@@ -402,7 +395,6 @@
                                 <li data-tab="tab-investigations">Investigations & Files</li>
                                 <li data-tab="tab-plan">Plan & Follow-up</li>
                                 <li data-tab="tab-growth">متابعة النمو (Growth)</li>
-                                <!-- تمت إضافة تبويب التطعيمات هنا -->
                                 <li data-tab="tab-vaccines">التطعيمات الإضافية</li>
                                 <li data-tab="tab-previous">Previous Visits</li>
                             </ul>
@@ -554,7 +546,6 @@
                                     </div>
 
                                     <div id="growthResultsBox" class="mt-20 hidden" style="background: #e0e7ff; padding: 15px; border-radius: 8px; border: 1px solid #c7d2fe;">
-                                        <!-- سيتم حقن النتائج هنا بواسطة الجافاسكريبت -->
                                     </div>
 
                                     <h3 class="section-title mt-20">منحنى النمو التفاعلي</h3>
@@ -573,7 +564,6 @@
                                     </div>
                                 </div>
 
-                                <!-- تمت إضافة قسم التطعيمات هنا -->
                                 <!-- Tab: Vaccines -->
                                 <div id="tab-vaccines" class="tab-pane hidden">
                                     <h3 class="section-title text-ar">سجل التطعيمات الإضافية المستقل</h3>
@@ -581,7 +571,6 @@
                                         <i class="fa-solid fa-circle-info"></i> السجل الموضح أدناه يعتمد على التواريخ الفعلية ويُحفظ بشكل دائم في ملف الطفل بشكل مستقل عن هذه الزيارة. المواعيد محسوبة آلياً بناءً على الجداول المرجعية وتتطلب التقييم السريري.
                                     </p>
                                     <div id="vaccinesListContainer" class="text-ar" style="display:flex; flex-direction:column; gap:12px;">
-                                        <!-- سيتم توليد محتوى التطعيمات والتنبيهات آلياً هنا -->
                                     </div>
                                 </div>
 
@@ -592,7 +581,6 @@
                                 </div>
                             </form>
 
-                            <!-- تم نقل التنسيقات المتعلقة بالأزرار إلى CSS للتحكم فيها بحرية في الشاشات المختلفة -->
                             <div class="consultation-actions-container">
                                 <button type="button" id="btnSaveDraft" class="btn-secondary btn-save"><i class="fa-solid fa-save"></i> حفظ المسودة</button>
                                 <button type="button" id="btnPrintRx" class="btn-secondary btn-print"><i class="fa-solid fa-print"></i> طباعة الروشتة</button>
@@ -638,7 +626,7 @@
         import { getFirestore, collection, addDoc, getDocs, getDoc, doc, query, where, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
         import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-storage.js";
         
-        // استدعاء محرك التطعيمات ومعجم التشخيصات
+        // استدعاء محرك التطعيمات الجديد ومعجم التشخيصات
         import { VaccineEngine } from './js/vaccines.js';
         import { pediatricDiagnoses } from './js/diagnoses-data.js';
 
@@ -686,7 +674,6 @@
                 await addDoc(collection(db, "vaccination_records"), newDose);
                 showToast("تم حفظ الجرعة بنجاح في السجل الدائم للطفل", "success");
                 
-                // تحديث الواجهة بعد الحفظ
                 const dobStr = document.getElementById('phDOB') ? document.getElementById('phDOB').innerText : null;
                 await renderVaccinationDashboard(patientId, dobStr);
             } catch (error) {
@@ -786,12 +773,10 @@
                         targetPane.classList.add('active');
                     }
 
-                    // التمرير التلقائي للتبويب في الموبايل ليكون في المنتصف
                     e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
                 });
             });
 
-            // إظهار وإخفاء حقل التاريخ بناءً على قرار الإعادة
             document.getElementById('planFollowupDecision').addEventListener('change', (e) => {
                 const dateContainer = document.getElementById('followUpDateContainer');
                 if (e.target.value === 'Required') {
@@ -915,7 +900,7 @@
 
         document.addEventListener("DOMContentLoaded", () => {
             setupTabs();
-
+            
             // ==========================================
             // وحدة البحث الذكي للتشخيصات (ICD-10-CM)
             // ==========================================
@@ -932,7 +917,6 @@
                         return;
                     }
                     
-                    // البحث في الكود، الاسم الإنجليزي، العربي، المرادفات، والاختصارات
                     const matches = pediatricDiagnoses.filter(d => 
                         d.titleEn.toLowerCase().includes(val) || 
                         d.code.toLowerCase().includes(val) || 
@@ -952,7 +936,6 @@
                                 <small>${aliases}</small>
                             `;
                             div.addEventListener('click', () => {
-                                // وضع النص المختار في الحقل وإخفاء القائمة
                                 diagInput.value = `${match.code} - ${match.titleEn}`;
                                 diagResults.style.display = 'none';
                             });
@@ -964,7 +947,6 @@
                     }
                 });
 
-                // إغلاق القائمة عند النقر خارجها
                 document.addEventListener('click', function(e) {
                     if (e.target !== diagInput && e.target !== diagResults) {
                         diagResults.style.display = 'none';
@@ -1082,7 +1064,6 @@
                         document.getElementById('gHeight').value = visit.growth.height || '';
                         document.getElementById('gHC').value = visit.growth.hc || '';
                     } else {
-                        // تفريغ الحقول إذا كانت الزيارة جديدة
                         document.getElementById('gWeight').value = '';
                         document.getElementById('gHeight').value = '';
                         document.getElementById('gHC').value = '';
@@ -1120,9 +1101,6 @@
                     showSection('consultationSection');
                     document.querySelector('[data-tab="tab-overview"]').click();
                     
-                    // ==========================================
-                    // تشغيل سجل التطعيمات بمجرد فتح الملف
-                    // ==========================================
                     await renderVaccinationDashboard(patientId, patient.dob);
 
                 } catch (e) {
@@ -1175,7 +1153,6 @@
                 });
             }
 
-            // عرض الملفات المرفوعة مسبقاً
             function renderFilesList() {
                 const ul = document.getElementById('filesList');
                 ul.innerHTML = '';
@@ -1191,7 +1168,6 @@
                 });
             }
 
-            // تجميع الداتا للحفظ (متضمنة الملفات)
             function buildVisitDataObject() {
                 return {
                     chiefComplaint: document.getElementById('visitComplaint').value,
@@ -1237,7 +1213,6 @@
                 };
             }
 
-            // الأزرار الرئيسية للحفظ وإنهاء الكشف
             document.getElementById('btnSaveDraft').addEventListener('click', async () => {
                 showLoading("جاري الحفظ...");
                 try {
@@ -1276,7 +1251,6 @@
                 }
             });
 
-            // طباعة الروشتة
             document.getElementById('btnPrintRx').addEventListener('click', () => {
                 document.getElementById('rxName').innerText = document.getElementById('phName').innerText;
                 document.getElementById('rxAge').innerText = document.getElementById('phAge').innerText;
@@ -1307,7 +1281,6 @@
                 window.print();
             });
 
-            // تحميل التاريخ المرضي السابق
             async function loadPreviousVisits() {
                 const container = document.getElementById('previousVisitsContainer');
                 container.innerHTML = '<p class="text-muted"><i class="fa-solid fa-spinner fa-spin"></i> جاري تحميل التاريخ المرضي...</p>';
@@ -1337,7 +1310,6 @@
                 }
             }
 
-            // رفع الملفات الطبية (تحاليل وأشعة)
             document.getElementById('btnUploadFile').addEventListener('click', async () => {
                 const fileInput = document.getElementById('fileUpload');
                 const file = fileInput.files[0];
@@ -1380,7 +1352,6 @@
             // ==========================================
             let growthChartInstance = null;
 
-            // دالة مساعدة لحساب العمر لتجنب الاعتماد الكلي على المحرك الخارجي في الرسم
             function getAgeInMonths(dobString, visitDateObj) {
                 if (!dobString || dobString === '--') return 0;
                 const dob = new Date(dobString);
@@ -1389,7 +1360,6 @@
                 return diffMs / (1000 * 60 * 60 * 24 * 30.4375);
             }
 
-            // 1. التعامل مع زر "حساب التقييم"
             const btnCalcGrowth = document.getElementById('btnCalcGrowth');
             if (btnCalcGrowth) {
                 btnCalcGrowth.addEventListener('click', async () => {
@@ -1404,7 +1374,6 @@
                         return;
                     }
 
-                    // حساب BMI إذا توفر الوزن والطول
                     let bmi = null;
                     if (weight > 0 && height > 0) {
                         bmi = (weight / Math.pow(height / 100, 2)).toFixed(2);
@@ -1420,18 +1389,15 @@
                     if (bmi) html += `<li><strong>مؤشر كتلة الجسم (BMI):</strong> ${bmi}</li>`;
                     html += `</ul>`;
                     
-                    // توضيح بخصوص مراجع WHO/CDC (الالتزام بالمعايير)
                     html += `<hr style="border-top:1px solid #c7d2fe; margin:10px 0;">`;
                     html += `<small class="text-muted"><i class="fa-solid fa-circle-info"></i> <strong>تنويه طبي:</strong> تم اختيار مرجع (${ref}). لحساب Z-Score و Percentile بدقة متناهية، يتطلب النظام ربط ملفات الـ LMS الرسمية المعتمدة بصيغة JSON. حالياً يتم رسم المسار التاريخي للطفل بدقة لمعرفة اتجاه النمو (Growth Velocity).</small>`;
                     
                     resultsBox.innerHTML = html;
 
-                    // تحديث الرسم البياني بالبيانات الجديدة
                     await renderGrowthChart(indicator, { weight, height, hc, bmi });
                 });
             }
 
-            // 2. تحديث الرسم عند تغيير المؤشر من القائمة (مثلاً من الطول للوزن)
             const gChartIndicator = document.getElementById('gChartIndicator');
             if (gChartIndicator) {
                 gChartIndicator.addEventListener('change', async (e) => {
@@ -1447,18 +1413,15 @@
                 });
             }
 
-            // 3. دالة رسم المنحنى التفاعلي (Chart.js)
             async function renderGrowthChart(indicator, currentData) {
                 const canvas = document.getElementById('growthChartCanvas');
                 if (!canvas) return;
                 const ctx = canvas.getContext('2d');
 
-                // تدمير الرسم القديم لمنع تداخل الرسومات
                 if (growthChartInstance) {
                     growthChartInstance.destroy();
                 }
 
-                // جلب تاريخ المريض لربط النقاط السابقة
                 let pastVisits = [];
                 try {
                     pastVisits = await getPreviousVisits(currentPatientId, currentVisitId);
@@ -1466,7 +1429,6 @@
 
                 const dobStr = document.getElementById('phDOB').innerText;
                 
-                // تحضير الداتا السابقة
                 const historicalPoints = [];
                 pastVisits.forEach(v => {
                     if (v.growth) {
@@ -1482,7 +1444,6 @@
                     }
                 });
 
-                // إضافة نقطة الزيارة الحالية للرسم
                 const currentAgeMonths = getAgeInMonths(dobStr, new Date());
                 let currentVal = null;
                 if (indicator === 'WFA') currentVal = currentData.weight;
@@ -1494,10 +1455,8 @@
                     historicalPoints.push({ x: currentAgeMonths.toFixed(2), y: parseFloat(currentVal).toFixed(2) });
                 }
 
-                // ترتيب النقاط زمنياً لتوصيل الخط بشكل صحيح
                 historicalPoints.sort((a, b) => a.x - b.x);
 
-                // إعداد عناوين المحاور بناءً على المؤشر المختار
                 let yLabel = 'القياس';
                 if (indicator === 'WFA') yLabel = 'الوزن (كجم)';
                 if (indicator === 'LFA') yLabel = 'الطول (سم)';
@@ -1517,7 +1476,7 @@
                                 pointRadius: 6,
                                 pointHoverRadius: 9,
                                 fill: false,
-                                tension: 0.2 // انحناء خفيف للخط
+                                tension: 0.2 
                             }
                         ]
                     },
