@@ -1,5 +1,10 @@
 import * as UI from "./doctor-ui.js";
 import * as DB from "./doctor-services.js";
+// استدعاءات فايربيز اللازمة لسيستم التطعيمات
+import { getApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+// استدعاء العقل المدبر للتطعيمات
+import { VaccineEngine } from './vaccines.js';
 
 // Global State
 let currentVisitId = null;
@@ -7,6 +12,90 @@ let currentPatientId = null;
 let currentMRN = null;
 let currentMedications = [];
 let currentFiles = [];
+
+// ==========================================
+// سيستم التطعيمات (Vaccination System)
+// ==========================================
+const vaccineEngine = new VaccineEngine();
+
+// دالة جلب سجل التطعيمات من قاعدة البيانات
+async function getPatientVaccinationRecord(patientId) {
+    const vaccineDb = getFirestore(getApp()); // جلب اتصال الداتابيز الحالي بأمان
+    const q = query(collection(vaccineDb, "vaccination_records"), where("patientId", "==", patientId));
+    const snap = await getDocs(q);
+    let history = [];
+    snap.forEach(doc => history.push({ id: doc.id, ...doc.data() }));
+    return history.sort((a, b) => new Date(a.dateGiven) - new Date(b.dateGiven));
+}
+
+// دالة حفظ جرعة جديدة في السجل الدائم
+window.saveVaccineDose = async (patientId, vaccineId, doseNum, dateGiven, source = "Clinic") => {
+    try {
+        const vaccineDb = getFirestore(getApp());
+        const newDose = {
+            patientId,
+            vaccineId,
+            doseNum: parseInt(doseNum),
+            dateGiven,
+            source,
+            recordedAt: serverTimestamp(),
+            recordedBy: "Dr. Ahmed Mady"
+        };
+        await addDoc(collection(vaccineDb, "vaccination_records"), newDose);
+        UI.showToast("تم حفظ الجرعة بنجاح في السجل الدائم للطفل", "success");
+        
+        // إعادة تحميل واجهة التطعيمات لتحديث الحالة
+        const dobStr = document.getElementById('phDOB') ? document.getElementById('phDOB').innerText : null;
+        await renderVaccinationDashboard(patientId, dobStr);
+    } catch (error) {
+        UI.showToast("خطأ أثناء حفظ الجرعة", "error");
+        console.error("Error saving vaccine dose:", error);
+    }
+};
+
+// دالة رسم واجهة التطعيمات وحساب التنبيهات
+async function renderVaccinationDashboard(patientId, dobStr) {
+    const history = await getPatientVaccinationRecord(patientId);
+    const report = vaccineEngine.generatePatientReport(dobStr, history);
+    
+    const container = document.getElementById('vaccinesListContainer');
+    if (!container) return; 
+    
+    container.innerHTML = '';
+    
+    report.forEach(v => {
+        let statusBadge = '';
+        if(v.status === 'Completed') statusBadge = '<span class="badge completed" style="background:#f1f5f9; color:#475569; padding:4px 8px; border-radius:12px; font-size:0.8rem; font-weight:bold;">مكتمل</span>';
+        if(v.status === 'Due Now') statusBadge = '<span class="badge consultation" style="background:#fef08a; color:#854d0e; padding:4px 8px; border-radius:12px; font-size:0.8rem; font-weight:bold;">مستحق الآن</span>';
+        if(v.status === 'Overdue') statusBadge = '<span class="badge waiting" style="background:#fee2e2; color:#991b1b; padding:4px 8px; border-radius:12px; font-size:0.8rem; font-weight:bold;">متأخر</span>';
+        if(v.status === 'Upcoming') statusBadge = '<span class="badge" style="background:#e0f2fe; color:#0369a1; padding:4px 8px; border-radius:12px; font-size:0.8rem; font-weight:bold;">موعد قادم</span>';
+
+        const todayString = typeof UI.getTodayStr === 'function' ? UI.getTodayStr() : new Date().toISOString().split('T')[0];
+
+        container.innerHTML += `
+            <div style="border:1px solid var(--border-color); padding:16px; border-radius:8px; margin-bottom:10px; background: #fff;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <strong style="color:var(--navy); font-size:1.1rem;">${v.name}</strong>
+                    ${statusBadge}
+                </div>
+                <p style="margin-top:8px; color:var(--slate); font-size:0.9rem;">
+                    <strong>الحالة:</strong> ${v.alert} <br>
+                    <strong>الجرعات المأخوذة:</strong> ${v.dosesGiven} من ${v.totalDoses}
+                </p>
+                ${v.status !== 'Completed' && !v.status.includes('Ineligible') ? `
+                    <div class="mt-10" style="display:flex; gap:10px; align-items:center;">
+                        <input type="date" id="date_${v.vaccineId}" value="${todayString}" style="padding:6px; border-radius:4px; border:1px solid #ccc; flex:1;">
+                        <button type="button" class="btn-secondary btn-small" onclick="window.saveVaccineDose('${patientId}', '${v.vaccineId}', ${v.dosesGiven + 1}, document.getElementById('date_${v.vaccineId}').value)" style="flex:1;">
+                            <i class="fa-solid fa-syringe"></i> تسجيل الجرعة ${v.dosesGiven + 1}
+                        </button>
+                    </div>
+                ` : ''}
+            </div>
+        `;
+    });
+}
+// ==========================================
+
 
 document.addEventListener("DOMContentLoaded", () => {
     UI.setupTabs();
@@ -184,6 +273,11 @@ document.addEventListener("DOMContentLoaded", () => {
             
             // Scroll top for mobile workflow
             window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            // ==========================================
+            // تشغيل سجل التطعيمات بمجرد فتح الملف
+            // ==========================================
+            await renderVaccinationDashboard(patientId, patient.dob);
 
         } catch (e) {
             console.error("Consultation Init Error:", e);
