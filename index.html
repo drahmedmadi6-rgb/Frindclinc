@@ -4,21 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>NEO KIDS - Clinical Workspace</title>
-    <!-- ملف الـ CSS الأساسي للمشروع -->
     <link rel="stylesheet" href="css/doctor.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- مكتبة Chart.js لمنحنيات النمو -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
     
     <style>
         /* =========================================
-           إعدادات المتغيرات والألوان الأساسية للمشروع
+           إعدادات الألوان والتصميم (Modern UI Variables)
            ========================================= */
         :root {
-            --primary-color: #0f766e;
+            --primary-color: #0f766e; /* Teal Theme */
             --primary-hover: #115e59;
-            --bg-color: #f8fafc;
+            --bg-color: #f1f5f9; /* Softer background */
             --card-bg: #ffffff;
             --text-main: #1e293b;
             --text-muted: #64748b;
@@ -29,122 +27,148 @@
             --safe-area-bottom: env(safe-area-inset-bottom, 0px);
         }
 
-        body { font-family: 'Tajawal', sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Tajawal', sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         *, *::before, *::after { box-sizing: inherit; }
 
+        /* تحسين الحقول للسرعة واللمس */
         input, select, textarea {
-            width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px;
-            font-family: inherit; font-size: 16px; transition: border-color 0.2s; background-color: #fff;
+            width: 100%; padding: 12px 14px; border: 1.5px solid var(--border-color); border-radius: 8px;
+            font-family: inherit; font-size: 16px; transition: all 0.2s ease; background-color: #f8fafc;
+            color: var(--text-main);
         }
-        input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.1); }
-        
-        button { cursor: pointer; font-family: inherit; border: none; border-radius: 6px; padding: 10px 16px; font-weight: 600; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
-        .btn-primary { background: var(--primary-color); color: #fff; }
-        .btn-primary:hover { background: var(--primary-hover); }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary-color); background-color: #fff; box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.1); }
+        label { display: block; margin-bottom: 6px; font-weight: 600; color: var(--text-main); font-size: 0.95rem; }
+
+        button { cursor: pointer; font-family: inherit; border: none; border-radius: 8px; padding: 12px 20px; font-weight: 700; font-size: 1rem; transition: all 0.2s ease; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+        button:active { transform: scale(0.98); }
+        .btn-primary { background: var(--primary-color); color: #fff; box-shadow: 0 4px 6px -1px rgba(15, 118, 110, 0.2); }
+        .btn-primary:hover { background: var(--primary-hover); box-shadow: 0 6px 8px -1px rgba(15, 118, 110, 0.3); }
         .btn-secondary { background: #e2e8f0; color: #1e293b; }
         .btn-secondary:hover { background: #cbd5e1; }
         .btn-danger { background: var(--danger-color); color: #fff; }
-        .btn-small { padding: 6px 12px; font-size: 0.85rem; }
+        .btn-small { padding: 8px 14px; font-size: 0.85rem; }
 
-        .source-badge { font-size: 0.75rem; padding: 2px 6px; border-radius: 4px; font-weight: bold; display: inline-block; margin-top: 4px; }
+        .source-badge { font-size: 0.75rem; padding: 4px 8px; border-radius: 6px; font-weight: bold; display: inline-block; margin-top: 6px; }
         .source-neo { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
         .source-frnd { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
 
+        /* الهيكل الأساسي */
         .app-container { display: flex; min-height: 100vh; }
-        .sidebar { width: 250px; background: var(--sidebar-bg); color: #fff; display: flex; flex-direction: column; flex-shrink: 0; }
-        .sidebar .brand { padding: 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .nav-menu { display: flex; flex-direction: column; padding: 10px 0; }
-        .nav-link { padding: 15px 20px; color: #cbd5e1; text-decoration: none; display: flex; align-items: center; gap: 10px; transition: 0.2s; }
-        .nav-link:hover, .nav-link.active { background: rgba(255,255,255,0.1); color: #fff; border-right: 4px solid var(--primary-color); }
+        .sidebar { width: 260px; background: var(--sidebar-bg); color: #fff; display: flex; flex-direction: column; flex-shrink: 0; box-shadow: 2px 0 10px rgba(0,0,0,0.1); z-index: 1000; }
+        .sidebar .brand { padding: 25px 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .nav-menu { display: flex; flex-direction: column; padding: 15px 0; }
+        .nav-link { padding: 15px 20px; color: #94a3b8; text-decoration: none; display: flex; align-items: center; gap: 12px; transition: 0.2s; font-weight: 600; border-right: 4px solid transparent; }
+        .nav-link:hover, .nav-link.active { background: rgba(255,255,255,0.05); color: #fff; border-right-color: var(--primary-color); }
         
-        .main-content { flex: 1; padding: 20px; max-width: calc(100% - 250px); }
+        .main-content { flex: 1; padding: 25px; max-width: calc(100% - 260px); }
         
-        .card { background: var(--card-bg); border-radius: 10px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 20px; }
-        .stat-card { display: flex; align-items: center; gap: 15px; padding: 20px; background: #fff; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .stat-icon { width: 50px; height: 50px; border-radius: 12px; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; flex-shrink: 0; }
+        /* البطاقات المحسنة */
+        .card { background: var(--card-bg); border-radius: 12px; padding: 25px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03); margin-bottom: 25px; border: 1px solid rgba(0,0,0,0.02); }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 25px; }
+        .stat-card { display: flex; align-items: center; gap: 15px; padding: 20px; background: #fff; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid var(--border-color); }
+        .stat-icon { width: 55px; height: 55px; border-radius: 14px; display: flex; justify-content: center; align-items: center; font-size: 1.6rem; flex-shrink: 0; }
         .stat-icon.waiting { background: #fef3c7; color: #d97706; }
         .stat-icon.consultation { background: #ccfbf1; color: #0f766e; }
         .stat-icon.completed { background: #f1f5f9; color: #64748b; }
 
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; }
         .full-width { grid-column: 1 / -1; }
-        .mt-10 { margin-top: 10px; } .mt-20 { margin-top: 20px; }
+        .mt-10 { margin-top: 10px; } .mt-20 { margin-top: 20px; } .mb-10 { margin-bottom: 10px; }
 
-        .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; width: 100%; border-radius: 8px; }
-        .data-table { width: 100%; border-collapse: collapse; min-width: 650px; }
-        .data-table th, .data-table td { padding: 12px 15px; text-align: right; border-bottom: 1px solid var(--border-color); vertical-align: middle; }
-        .data-table th { background: #f8fafc; font-weight: 700; color: var(--text-muted); white-space: nowrap; }
-        .badge { padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600; white-space: nowrap; }
+        /* الجداول المحسنة */
+        .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; width: 100%; border-radius: 8px; border: 1px solid var(--border-color); }
+        .data-table { width: 100%; border-collapse: collapse; min-width: 700px; background: #fff; }
+        .data-table th, .data-table td { padding: 15px; text-align: right; border-bottom: 1px solid var(--border-color); vertical-align: middle; }
+        .data-table th { background: #f8fafc; font-weight: 700; color: var(--text-muted); white-space: nowrap; font-size: 0.95rem; }
+        .data-table tbody tr:hover { background-color: #f8fafc; }
+        
+        .badge { padding: 6px 10px; border-radius: 6px; font-size: 0.85rem; font-weight: 700; white-space: nowrap; }
         .badge.waiting { background: #fef3c7; color: #d97706; }
         .badge.consultation { background: #ccfbf1; color: #0f766e; }
         .badge.completed { background: #f1f5f9; color: #64748b; }
 
-        .workspace-grid { display: grid; grid-template-columns: 250px 1fr; gap: 20px; align-items: start; }
+        /* التبويبات الطبية ديسكتوب */
+        .workspace-grid { display: grid; grid-template-columns: 250px 1fr; gap: 25px; align-items: start; position: relative; }
+        .clinical-nav { position: sticky; top: 90px; } /* جعل القائمة الجانبية ثابتة في الديسكتوب */
         .clinical-nav ul { list-style: none; padding: 0; margin: 0; }
-        .clinical-nav li { padding: 12px 15px; border-bottom: 1px solid var(--border-color); cursor: pointer; transition: 0.2s; font-weight: 500; }
-        .clinical-nav li:hover { background: #f1f5f9; }
-        .clinical-nav li.active { border-right: 4px solid var(--primary-color); background: #f8fafc; color: var(--primary-color); font-weight: 700; }
+        .clinical-nav li { padding: 14px 18px; border-bottom: 1px solid var(--border-color); cursor: pointer; transition: all 0.2s ease; font-weight: 600; color: var(--text-muted); display: flex; align-items: center; gap: 10px; }
+        .clinical-nav li:hover { background: #f1f5f9; color: var(--primary-color); }
+        .clinical-nav li.active { border-right: 4px solid var(--primary-color); background: #f8fafc; color: var(--primary-color); font-weight: 800; }
         
-        /* تأكيد العرض الصحيح للتبويبات */
+        /* رأس المريض الثابت (Sticky Header) */
+        .sticky-patient-header { position: sticky; top: 0; z-index: 90; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(8px); margin-bottom: 20px; padding: 15px 20px; border: 1px solid var(--border-color); border-top: 4px solid var(--primary-color); box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+        .patient-header-grid { display: flex; flex-wrap: wrap; gap: 15px 30px; align-items: center; }
+        .patient-header-grid div { display: flex; flex-direction: column; }
+        .patient-header-grid div strong { font-size: 1.1rem; color: var(--text-main); }
+        
         .page-section { display: none; animation: fadeIn 0.3s ease; }
         .page-section.active { display: block; }
         .tab-pane { display: none; animation: fadeIn 0.3s ease; }
         .tab-pane.active { display: block; }
         .hidden { display: none !important; }
 
-        .file-list { list-style: none; padding: 0; margin: 0; }
-        .file-list li { display: flex; justify-content: space-between; padding: 10px; background: #f8fafc; border: 1px solid var(--border-color); border-radius: 6px; margin-bottom: 8px; align-items: center; word-break: break-all; }
+        .consultation-actions-container { display: flex; flex-wrap: wrap; gap: 15px; border-top: 1px solid var(--border-color); padding-top: 25px; margin-top: 25px; }
+        .consultation-actions-container .btn-save, .consultation-actions-container .btn-print { flex: 1; min-width: 150px; }
+        .consultation-actions-container .btn-complete { flex: 2; min-width: 250px; }
 
-        .consultation-actions-container { display: flex; gap: 10px; border-top: 1px solid var(--border-color); padding-top: 20px; margin-top: 20px; }
-        .consultation-actions-container .btn-save, .consultation-actions-container .btn-print { flex: 1; }
-        .consultation-actions-container .btn-complete { flex: 2; }
-
-        /* Autocomplete & Modals */
+        /* البحث والنافذة المنبثقة */
         .autocomplete-wrapper { position: relative; width: 100%; }
-        .autocomplete-results { position: absolute; top: 100%; left: 0; right: 0; z-index: 1050; background: #fff; border: 1px solid var(--border-color); border-radius: 6px; max-height: 250px; overflow-y: auto; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: none; }
-        .autocomplete-item { padding: 12px; cursor: pointer; border-bottom: 1px solid #f1f5f9; text-align: left; direction: ltr; }
+        .autocomplete-results { position: absolute; top: calc(100% + 5px); left: 0; right: 0; z-index: 1050; background: #fff; border: 1px solid var(--border-color); border-radius: 8px; max-height: 250px; overflow-y: auto; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); display: none; }
+        .autocomplete-item { padding: 14px; cursor: pointer; border-bottom: 1px solid #f1f5f9; text-align: left; direction: ltr; transition: background 0.2s; }
         .autocomplete-item:hover { background: #f8fafc; border-left: 3px solid var(--primary-color); }
         .autocomplete-item strong { color: var(--primary-color); font-size: 1.05rem; }
-        .autocomplete-item .diag-name { color: var(--text-main); font-weight: 600; margin-left: 8px; }
-        .autocomplete-item small { color: var(--text-muted); display: block; margin-top: 4px; font-size: 0.85rem; }
-        .custom-badge { background: #fef08a; color: #854d0e; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; margin-left: 8px; }
+        .autocomplete-item .diag-name { color: var(--text-main); font-weight: 700; margin-left: 8px; }
+        .autocomplete-item small { color: var(--text-muted); display: block; margin-top: 6px; font-size: 0.85rem; }
+        .custom-badge { background: #fef08a; color: #854d0e; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; margin-left: 8px; font-weight: bold; }
 
-        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 1100; display: none; justify-content: center; align-items: center; padding: 20px; backdrop-filter: blur(2px); }
-        .modal-overlay.active { display: flex; }
-        .modal-content { background: #fff; padding: 24px; border-radius: 12px; width: 100%; max-width: 500px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.7); z-index: 1100; display: none; justify-content: center; align-items: center; padding: 20px; backdrop-filter: blur(4px); }
+        .modal-overlay.active { display: flex; animation: fadeIn 0.2s ease; }
+        .modal-content { background: #fff; padding: 30px; border-radius: 16px; width: 100%; max-width: 500px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Responsive Mobile Architecture */
-        @media (max-width: 992px) { .workspace-grid { grid-template-columns: 1fr; } }
+        /* =========================================
+           تصميم الموبايل الحديث (Mobile First Architecture)
+           ========================================= */
+        /* زر قائمة التنقل للموبايل (مخفي في الديسكتوب) */
+        .mobile-nav-toggle { display: none; background: var(--primary-color); color: white; padding: 14px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; text-align: center; margin-bottom: 15px; box-shadow: 0 4px 6px -1px rgba(15,118,110,0.2); justify-content: space-between; align-items: center; }
+
+        @media (max-width: 992px) { .workspace-grid { grid-template-columns: 1fr; } .clinical-nav { position: static; } }
+        
         @media (max-width: 768px) {
-            html, body { overflow-x: hidden !important; width: 100% !important; max-width: 100vw !important; margin: 0 !important; padding: 0 !important; }
-            .app-container { flex-direction: column !important; width: 100% !important; max-width: 100vw !important; overflow-x: hidden !important; }
-            .main-content { margin: 0 !important; margin-bottom: calc(75px + var(--safe-area-bottom)) !important; padding: 10px !important; width: 100% !important; max-width: 100vw !important; box-sizing: border-box !important; overflow-x: hidden !important; } 
-            .card { width: 100% !important; max-width: 100% !important; box-sizing: border-box !important; margin-left: 0 !important; margin-right: 0 !important; overflow: visible !important; }
-            .sidebar { width: 100% !important; height: calc(65px + var(--safe-area-bottom)) !important; position: fixed !important; bottom: 0 !important; left: 0 !important; right: 0 !important; flex-direction: row !important; box-shadow: 0 -4px 15px rgba(0,0,0,0.1) !important; z-index: 1000 !important; padding-bottom: var(--safe-area-bottom) !important; margin: 0 !important; }
+            html, body { overflow-x: hidden !important; width: 100% !important; margin: 0 !important; padding: 0 !important; }
+            .app-container { flex-direction: column !important; }
+            
+            /* شريط التنقل السفلي للتطبيق */
+            .sidebar { width: 100% !important; height: calc(70px + var(--safe-area-bottom)) !important; position: fixed !important; bottom: 0 !important; left: 0 !important; right: 0 !important; flex-direction: row !important; box-shadow: 0 -4px 20px rgba(0,0,0,0.1) !important; z-index: 1000 !important; padding-bottom: var(--safe-area-bottom) !important; }
             .brand { display: none !important; }
-            .nav-menu { flex-direction: row !important; padding: 0 !important; width: 100% !important; justify-content: space-around !important; background: var(--sidebar-bg) !important; align-items: center !important; height: 100% !important; }
-            .nav-link { flex: 1 !important; flex-direction: column !important; padding: 8px 4px !important; gap: 4px !important; border-right: none !important; font-size: 0.75rem !important; justify-content: center !important; text-align: center !important; border-top: 3px solid transparent !important; margin: 0 !important; }
-            .nav-link.active { border-right: none !important; border-top-color: var(--primary-color) !important; background: rgba(255,255,255,0.05) !important; }
-            header.top-header { flex-wrap: wrap !important; gap: 10px !important; margin-bottom: 15px !important; justify-content: space-between !important; width: 100% !important; box-sizing: border-box !important; }
-            .stats-grid { grid-template-columns: 1fr !important; gap: 12px !important; width: 100% !important; }
-            .workspace-grid { display: flex !important; flex-direction: column !important; gap: 12px !important; width: 100% !important; }
-            .clinical-nav { width: 100% !important; overflow: hidden !important; padding: 0 !important; }
-            .clinical-nav ul { flex-direction: row !important; overflow-x: auto !important; scroll-snap-type: x mandatory !important; white-space: nowrap !important; -webkit-overflow-scrolling: touch !important; display: flex !important; border-bottom: 1px solid var(--border-color) !important; }
-            .clinical-nav ul::-webkit-scrollbar { display: none !important; }
-            .clinical-nav li { padding: 14px 16px !important; border-bottom: 3px solid transparent !important; border-left: none !important; border-right: none !important; font-size: 0.95rem !important; display: inline-block !important; flex-shrink: 0 !important; scroll-snap-align: start !important; }
-            .clinical-nav li.active { border-bottom-color: var(--primary-color) !important; }
-            .form-grid { grid-template-columns: 1fr !important; gap: 12px !important; width: 100% !important; }
-            .patient-header-grid { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 12px !important; font-size: 0.9rem !important; word-break: break-word !important; }
-            .consultation-actions-container { flex-direction: column !important; gap: 12px !important; width: 100% !important; }
-            .consultation-actions-container button { width: 100% !important; padding: 14px !important; font-size: 1rem !important; flex: none !important; }
-            .table-responsive { width: 100% !important; overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; margin: 0 !important; }
-            .toast { top: auto !important; bottom: calc(85px + var(--safe-area-bottom)) !important; transform: translateX(-50%) !important; }
+            .nav-menu { flex-direction: row !important; padding: 0 !important; width: 100% !important; justify-content: space-around !important; }
+            .nav-link { flex: 1 !important; flex-direction: column !important; padding: 10px 4px !important; gap: 6px !important; border-right: none !important; font-size: 0.8rem !important; border-top: 3px solid transparent !important; }
+            .nav-link.active { border-right: none !important; border-top-color: var(--primary-color) !important; background: rgba(255,255,255,0.05) !important; color: var(--primary-color); }
+            
+            .main-content { margin: 0 !important; margin-bottom: calc(80px + var(--safe-area-bottom)) !important; padding: 15px !important; } 
+            .card { padding: 15px !important; margin-bottom: 15px !important; }
+            
+            header.top-header { margin-bottom: 20px !important; }
+            .patient-header-grid { flex-direction: column; gap: 8px; }
+            .patient-header-grid div.full-width { border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 5px; }
+
+            /* تحويل التبويبات إلى قائمة منسدلة عمودية أنيقة للموبايل */
+            .mobile-nav-toggle { display: flex !important; }
+            .clinical-nav { display: none; /* مخفية افتراضياً */ background: #fff; border: 1px solid var(--border-color); border-radius: 8px; position: absolute; top: calc(100% + 5px); left: 0; right: 0; z-index: 95; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+            .clinical-nav.show { display: block; animation: fadeIn 0.2s ease; }
+            .clinical-nav ul { flex-direction: column !important; display: flex !important; }
+            .clinical-nav li { padding: 16px 20px !important; border-bottom: 1px solid var(--border-color) !important; border-left: none !important; border-right: none !important; border-right: 4px solid transparent !important; }
+            .clinical-nav li.active { border-bottom-color: var(--border-color) !important; border-right-color: var(--primary-color) !important; background: #f8fafc !important; }
+
+            .workspace-grid { display: flex !important; flex-direction: column !important; position: relative; }
+            .consultation-actions-container { flex-direction: column !important; }
+            .consultation-actions-container button { width: 100% !important; flex: none !important; }
+            
+            .toast { top: auto !important; bottom: calc(90px + var(--safe-area-bottom)) !important; transform: translateX(-50%) !important; width: 90%; text-align: center; }
         }
 
-        /* Print Settings */
+        /* إعدادات الطباعة */
         .print-only { display: none; }
         @media print {
             body * { visibility: hidden; }
@@ -159,39 +183,39 @@
             .rx-footer { position: fixed; bottom: 30px; width: 100%; text-align: center; font-size: 0.9rem; }
         }
 
-        .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(4px); }
-        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid var(--primary-color); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 10px; }
+        .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
+        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid var(--primary-color); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin-bottom: 15px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); padding: 12px 24px; color: white; border-radius: 8px; z-index: 10000; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.15); transition: opacity 0.3s; }
+        .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); padding: 14px 28px; color: white; border-radius: 8px; z-index: 10000; font-weight: bold; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); transition: opacity 0.3s; }
         .d-flex { display: flex; } .justify-between { justify-content: space-between; } .align-center { align-items: center; }
     </style>
 </head>
 <body>
     <div id="loadingOverlay" class="loading-overlay hidden">
         <div class="spinner"></div>
-        <p id="loadingText">جاري المعالجة...</p>
+        <p id="loadingText" style="font-weight:bold; color:var(--primary-color); font-size:1.1rem;">جاري التحميل...</p>
     </div>
     <div id="toast" class="toast hidden"></div>
 
     <div class="app-container no-print">
         <aside class="sidebar">
             <div class="brand">
-                <h1 style="margin:0; font-size: 1.5rem;">عيادات الأصدقاء & نيو كيدز</h1>
-                <p class="doctor-name" style="margin:5px 0;">د. أحمد ماضي</p>
-                <p class="specialty" style="margin:0; font-size:0.9rem; color:#cbd5e1;">طب الأطفال وحديثي الولادة</p>
+                <h1 style="margin:0; font-size: 1.5rem; letter-spacing: 1px;">NEO KIDS</h1>
+                <p class="doctor-name" style="margin:8px 0 2px 0;">د. أحمد ماضي</p>
+                <p class="specialty" style="margin:0; font-size:0.85rem; color:#94a3b8;">طب الأطفال وحديثي الولادة</p>
             </div>
             <nav class="nav-menu">
-                <a href="#" class="nav-link active" data-target="dashboardSection"><i class="fa-solid fa-stethoscope"></i> العيادة (الاستقبال)</a>
-                <a href="#" class="nav-link" data-target="patientsSection"><i class="fa-solid fa-users"></i> سجل المرضى</a>
+                <a href="#" class="nav-link active" data-target="dashboardSection"><i class="fa-solid fa-house-medical"></i> <span>العيادة (الاستقبال)</span></a>
+                <a href="#" class="nav-link" data-target="patientsSection"><i class="fa-solid fa-users"></i> <span>سجل المرضى</span></a>
             </nav>
         </aside>
 
         <main class="main-content">
             <header class="top-header d-flex justify-between align-center">
-                <h2 id="pageTitle" style="margin: 0;">العيادة (إدارة الفروع)</h2>
-                <div class="user-info badge" style="background: #e2e8f0; color: #1e293b; display: flex; gap: 8px; align-items: center; padding: 8px 12px;">
+                <h2 id="pageTitle" style="margin: 0; color: var(--text-main);">لوحة التحكم (جميع الفروع)</h2>
+                <div class="user-info badge" style="background: #fff; border: 1px solid var(--border-color); color: var(--text-main); display: flex; gap: 10px; align-items: center; padding: 10px 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
                     <span class="user-role">د. أحمد ماضي</span>
-                    <i class="fa-solid fa-user-doctor text-primary"></i>
+                    <i class="fa-solid fa-user-doctor text-primary" style="font-size:1.2rem;"></i>
                 </div>
             </header>
 
@@ -205,39 +229,39 @@
                         <div class="stat-card">
                             <div class="stat-icon waiting"><i class="fa-solid fa-hourglass-half"></i></div>
                             <div class="stat-info">
-                                <h3 style="margin: 0 0 5px 0; font-size: 1rem; color: var(--text-muted);">في الانتظار</h3>
-                                <p id="dashWaitingCount" style="margin: 0; font-size: 1.5rem; font-weight: bold;">0</p>
+                                <h3 style="margin: 0 0 5px 0; font-size: 0.95rem; color: var(--text-muted);">في الانتظار</h3>
+                                <p id="dashWaitingCount" style="margin: 0; font-size: 1.8rem; font-weight: 800; color: var(--text-main);">0</p>
                             </div>
                         </div>
                         <div class="stat-card">
                             <div class="stat-icon consultation"><i class="fa-solid fa-user-md"></i></div>
                             <div class="stat-info">
-                                <h3 style="margin: 0 0 5px 0; font-size: 1rem; color: var(--text-muted);">داخل الكشف</h3>
-                                <p id="dashConsultingCount" style="margin: 0; font-size: 1.5rem; font-weight: bold;">0</p>
+                                <h3 style="margin: 0 0 5px 0; font-size: 0.95rem; color: var(--text-muted);">قيد الكشف</h3>
+                                <p id="dashConsultingCount" style="margin: 0; font-size: 1.8rem; font-weight: 800; color: var(--text-main);">0</p>
                             </div>
                         </div>
                         <div class="stat-card">
                             <div class="stat-icon completed"><i class="fa-solid fa-check-circle"></i></div>
                             <div class="stat-info">
-                                <h3 style="margin: 0 0 5px 0; font-size: 1rem; color: var(--text-muted);">اكتملوا اليوم</h3>
-                                <p id="dashCompletedCount" style="margin: 0; font-size: 1.5rem; font-weight: bold;">0</p>
+                                <h3 style="margin: 0 0 5px 0; font-size: 0.95rem; color: var(--text-muted);">اكتملوا اليوم</h3>
+                                <p id="dashCompletedCount" style="margin: 0; font-size: 1.8rem; font-weight: 800; color: var(--text-main);">0</p>
                             </div>
                         </div>
                     </div>
 
                     <div class="card">
-                        <div class="card-header d-flex justify-between align-center" style="margin-bottom: 15px;">
-                            <h3 style="margin: 0;">غرفة الانتظار (تستقبل من الفروع آلياً)</h3>
-                            <button id="btnRefreshToday" class="btn-secondary btn-small"><i class="fa-solid fa-sync"></i> تحديث القائمة</button>
+                        <div class="card-header d-flex justify-between align-center" style="margin-bottom: 20px;">
+                            <h3 style="margin: 0; color: var(--primary-color);"><i class="fa-solid fa-list-ul"></i> قائمة الحالات اليوم</h3>
+                            <button id="btnRefreshToday" class="btn-secondary btn-small"><i class="fa-solid fa-rotate-right"></i> تحديث</button>
                         </div>
                         <div class="table-responsive">
                             <table class="data-table" id="todayTable">
                                 <thead>
                                     <tr>
-                                        <th>وقت الحجز</th>
+                                        <th>الوقت</th>
                                         <th>الرقم / الفرع</th>
-                                        <th>اسم الطفل</th>
-                                        <th>الشكوى المسجلة</th>
+                                        <th>الاسم</th>
+                                        <th>الشكوى</th>
                                         <th>الحالة</th>
                                         <th>الإجراء</th>
                                     </tr>
@@ -249,116 +273,103 @@
                 </section>
 
                 <!-- ==========================================
-                     2. واجهة الكشف الطبي الشامل
+                     2. واجهة الكشف الطبي الشامل المحسنة
                      ========================================== -->
                 <section id="consultationSection" class="page-section hidden">
-                    <div class="patient-header card">
+                    <!-- هيدر المريض الثابت للسرعة -->
+                    <div class="patient-header card sticky-patient-header">
                         <div class="patient-header-grid">
-                            <div class="full-width"><small class="text-muted">اسم الطفل:</small> <strong id="phName" class="text-primary" style="font-size: 1.1rem;">--</strong></div>
-                            <div><small class="text-muted">الرقم الطبي:</small> <strong id="phMRN" dir="ltr">--</strong></div>
-                            <div><small class="text-muted">العمر:</small> <strong id="phAge">--</strong></div>
+                            <div class="full-width">
+                                <small class="text-muted">الاسم:</small> 
+                                <strong id="phName" class="text-primary" style="font-size: 1.3rem;">--</strong>
+                            </div>
+                            <div><small class="text-muted">رقم الملف:</small> <strong id="phMRN" dir="ltr" style="color:var(--text-main);">--</strong></div>
+                            <div><small class="text-muted">العمر:</small> <strong id="phAge" style="background:#e2e8f0; padding:2px 8px; border-radius:4px;">--</strong></div>
                             <div><small class="text-muted">النوع:</small> <strong id="phGender">--</strong></div>
-                            <div><small class="text-muted">تاريخ الميلاد:</small> <strong id="phDOB" dir="ltr">--</strong></div>
+                            <div><small class="text-muted">الميلاد:</small> <strong id="phDOB" dir="ltr">--</strong></div>
                         </div>
                     </div>
 
                     <div class="workspace-grid">
-                        <div class="clinical-nav card" style="padding: 0;">
+                        <!-- زر التنقل للموبايل -->
+                        <div class="mobile-nav-toggle" id="mobileNavToggle">
+                            <span id="currentTabLabel"><i class="fa-solid fa-notes-medical"></i> الشكوى (Complaint)</span> 
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </div>
+
+                        <!-- القائمة الجانبية (عمودية على الموبايل عند الفتح) -->
+                        <div class="clinical-nav card" id="clinicalNavMenu" style="padding: 0;">
                             <ul id="clinicalTabs">
-                                <li class="active" data-tab="tab-overview">الشكوى (Complaint)</li>
-                                <li data-tab="tab-exam">القياسات والفحص</li>
-                                <li data-tab="tab-history">التاريخ المرضي</li>
-                                <li data-tab="tab-diagnosis">التشخيص (Diagnosis)</li>
-                                <li data-tab="tab-meds">الروشتة (Rx)</li>
-                                <li data-tab="tab-growth">النمو (Growth)</li>
-                                <li data-tab="tab-vaccines">التطعيمات (Vaccines)</li>
-                                <li data-tab="tab-investigations">فحوصات وملفات</li>
-                                <li data-tab="tab-plan">الخطة والمتابعة</li>
-                                <li data-tab="tab-previous">تاريخ الزيارات</li>
+                                <li class="active" data-tab="tab-overview"><i class="fa-solid fa-clipboard-user"></i> الشكوى والقياسات</li>
+                                <li data-tab="tab-diagnosis"><i class="fa-solid fa-stethoscope"></i> التشخيص (Diagnosis)</li>
+                                <li data-tab="tab-meds"><i class="fa-solid fa-pills"></i> الروشتة (Rx)</li>
+                                <li data-tab="tab-exam"><i class="fa-solid fa-heart-pulse"></i> الفحص السريري</li>
+                                <li data-tab="tab-history"><i class="fa-solid fa-clock-rotate-left"></i> التاريخ المرضي</li>
+                                <li data-tab="tab-growth"><i class="fa-solid fa-chart-line"></i> منحنيات النمو (Growth)</li>
+                                <li data-tab="tab-vaccines"><i class="fa-solid fa-syringe"></i> التطعيمات (Vaccines)</li>
+                                <li data-tab="tab-investigations"><i class="fa-solid fa-file-waveform"></i> فحوصات وملفات</li>
+                                <li data-tab="tab-plan"><i class="fa-solid fa-list-check"></i> الخطة والمتابعة</li>
+                                <li data-tab="tab-previous"><i class="fa-solid fa-folder-open"></i> الزيارات السابقة</li>
                             </ul>
                         </div>
 
-                        <div class="clinical-content card">
+                        <div class="clinical-content card" style="padding: 30px;">
                             <form id="visitForm">
+                                <!-- التبويب 1: الشكوى والقياسات (مركز الكشف) -->
                                 <div id="tab-overview" class="tab-pane active">
-                                    <h3 class="section-title">الشكوى الرئيسية (Chief Complaint)</h3>
+                                    <h3 class="section-title mb-10"><i class="fa-solid fa-comment-medical text-primary"></i> الشكوى الرئيسية (Chief Complaint)</h3>
                                     <div class="form-group full-width">
-                                        <textarea id="visitComplaint" rows="3" placeholder="أعراض المريض الرئيسية وتطورها..."></textarea>
-                                        <small class="text-muted mt-10" id="receptionComplaintNote" style="display:block;">شكوى الاستقبال: <strong><span></span></strong></small>
-                                    </div>
-                                    <h3 class="section-title mt-20">العلامات الحيوية (Vitals)</h3>
-                                    <div class="form-grid">
-                                        <div class="form-group"><label>الحرارة (°C)</label><input type="number" step="0.1" id="vTemp"></div>
-                                        <div class="form-group"><label>الوزن (Kg)</label><input type="number" step="0.01" id="vWeight"></div>
-                                        <div class="form-group"><label>الطول (cm)</label><input type="number" step="0.1" id="vHeight"></div>
-                                        <div class="form-group"><label>الأكسجين (%)</label><input type="number" id="vSpo2"></div>
-                                    </div>
-                                </div>
-
-                                <div id="tab-exam" class="tab-pane hidden">
-                                    <h3 class="section-title">الفحص العام (General Examination)</h3>
-                                    <div class="form-group full-width">
-                                        <textarea id="examGeneral" rows="3" placeholder="Consciousness, Hydration, Pallor, Jaundice, Activity..."></textarea>
-                                    </div>
-                                    <h3 class="section-title mt-20">فحص الأجهزة (Systemic Examination)</h3>
-                                    <div class="form-grid">
-                                        <div class="form-group full-width"><label>الصدر (Respiratory)</label><input type="text" id="examResp"></div>
-                                        <div class="form-group full-width"><label>القلب (Cardiovascular)</label><input type="text" id="examCVS"></div>
-                                        <div class="form-group full-width"><label>البطن (Abdomen / GI)</label><input type="text" id="examAbd"></div>
-                                        <div class="form-group full-width"><label>أعصاب / أنف وأذن / جلد (Neuro/ENT/Skin)</label><input type="text" id="examNeuro"></div>
-                                    </div>
-                                </div>
-
-                                <div id="tab-history" class="tab-pane hidden">
-                                    <h3 class="section-title">تاريخ حديثي الولادة (Neonatal & Birth History)</h3>
-                                    <div class="form-grid">
-                                        <div class="form-group"><label>عمر الحمل (Gestational Age)</label><input type="text" id="histGestational" placeholder="e.g. 38 weeks"></div>
-                                        <div class="form-group"><label>طريقة الولادة</label>
-                                            <select id="histDelivery"><option value="">Select...</option><option value="NVD">NVD (طبيعي)</option><option value="CS">CS (قيصري)</option></select>
+                                        <textarea id="visitComplaint" rows="3" placeholder="أعراض المريض وتطورها..."></textarea>
+                                        <div style="background: #f8fafc; padding: 10px; border-radius: 6px; margin-top: 8px; border: 1px solid var(--border-color);">
+                                            <small class="text-muted">سجله الاستقبال: </small><strong id="receptionComplaintNote" class="text-primary"><span></span></strong>
                                         </div>
-                                        <div class="form-group"><label>وزن الولادة (Kg)</label><input type="number" step="0.1" id="histBirthWeight"></div>
-                                        <div class="form-group"><label>دخول الحضانات (NICU)</label><input type="text" id="histNICU" placeholder="السبب والمدة"></div>
                                     </div>
-                                    <h3 class="section-title mt-20">تاريخ الحساسية والأمراض السابقة</h3>
-                                    <div class="form-group full-width">
-                                        <textarea id="histPastFamily" rows="3" placeholder="حساسية، أمراض وراثية، عمليات سابقة..."></textarea>
+                                    <h3 class="section-title mt-20 mb-10"><i class="fa-solid fa-temperature-half text-primary"></i> العلامات الحيوية (Vitals)</h3>
+                                    <div class="form-grid">
+                                        <!-- تم إضافة inputmode لفتح كيبورد الأرقام عالموبايل -->
+                                        <div class="form-group"><label>الحرارة (°C)</label><input type="number" step="0.1" inputmode="decimal" id="vTemp" placeholder="37.0"></div>
+                                        <div class="form-group"><label>الوزن (Kg)</label><input type="number" step="0.01" inputmode="decimal" id="vWeight" placeholder="كجم"></div>
+                                        <div class="form-group"><label>الطول (cm)</label><input type="number" step="0.1" inputmode="decimal" id="vHeight" placeholder="سم"></div>
+                                        <div class="form-group"><label>الأكسجين (%)</label><input type="number" inputmode="numeric" id="vSpo2" placeholder="%"></div>
                                     </div>
                                 </div>
 
+                                <!-- التبويب 4: التشخيص -->
                                 <div id="tab-diagnosis" class="tab-pane hidden">
-                                    <h3 class="section-title">التقييم والتشخيص (Assessment & Diagnosis)</h3>
+                                    <h3 class="section-title mb-10"><i class="fa-solid fa-stethoscope text-primary"></i> التقييم والتشخيص</h3>
                                     <div class="form-group full-width">
                                         <label>التشخيص الأساسي (Primary Diagnosis) <span class="text-danger">*</span></label>
                                         <div class="autocomplete-wrapper">
-                                            <input type="text" id="diagPrimary" required placeholder="ابحث بالاسم العلمي، العربي، الاختصار أو الكود (ICD-10-CM)..." autocomplete="off">
+                                            <input type="text" id="diagPrimary" required placeholder="ابحث بالاسم العلمي، العربي، أو الكود..." autocomplete="off">
                                             <div id="diagAutocompleteResults" class="autocomplete-results"></div>
                                         </div>
                                     </div>
-                                    <div class="form-group full-width mt-10">
-                                        <label>تشخيصات إضافية (Secondary Diagnoses)</label>
-                                        <textarea id="diagSecondary" rows="2"></textarea>
+                                    <div class="form-group full-width mt-20">
+                                        <label>تشخيصات وملاحظات إضافية</label>
+                                        <textarea id="diagSecondary" rows="2" placeholder="ملاحظات تشخيصية أخرى..."></textarea>
                                     </div>
                                 </div>
 
+                                <!-- التبويب 5: الأدوية والروشتة -->
                                 <div id="tab-meds" class="tab-pane hidden">
-                                    <h3 class="section-title">إعداد الروشتة (Prescription)</h3>
-                                    <div class="card" style="background: #f8fafc; border: 1px solid var(--border-color); box-shadow: none;">
+                                    <h3 class="section-title mb-10"><i class="fa-solid fa-pills text-primary"></i> إعداد الروشتة (Rx)</h3>
+                                    <div class="card" style="background: #f8fafc; border: 1px solid var(--border-color); box-shadow: none; padding: 20px;">
                                         <div class="form-grid">
                                             <div class="form-group full-width">
-                                                <div class="d-flex justify-between align-center" style="margin-bottom: 6px;">
-                                                    <label style="margin:0;">اسم الدواء (Medication Name) <span class="text-danger">*</span></label>
-                                                    <button type="button" id="btnShowCustomMed" style="background:none; border:none; color:var(--primary-color); font-size:0.85rem; padding:0; text-decoration:underline;"><i class="fa-solid fa-plus"></i> إضافة دواء غير مدرج للقاموس</button>
+                                                <div class="d-flex justify-between align-center mb-10">
+                                                    <label style="margin:0;">اسم الدواء (Medication) <span class="text-danger">*</span></label>
+                                                    <button type="button" id="btnShowCustomMed" class="btn-secondary btn-small" style="background:#fff; border:1px solid var(--border-color);"><i class="fa-solid fa-plus"></i> إضافة دواء غير مدرج</button>
                                                 </div>
                                                 <div class="autocomplete-wrapper">
-                                                    <input type="text" id="medName" placeholder="ابحث في دليل الأدوية المحلي أو المخصص..." autocomplete="off">
+                                                    <input type="text" id="medName" placeholder="ابحث في دليل الأدوية..." autocomplete="off">
                                                     <div id="medAutocompleteResults" class="autocomplete-results"></div>
                                                 </div>
                                             </div>
-                                            <div class="form-group"><label>الجرعة (Dose & Freq)</label><input type="text" id="medDose" placeholder="e.g. 5ml every 8 hours" dir="ltr"></div>
+                                            <div class="form-group"><label>الجرعة (Dose)</label><input type="text" id="medDose" placeholder="e.g. 5ml every 8 hours" dir="ltr"></div>
                                             <div class="form-group"><label>المدة (Duration)</label><input type="text" id="medDuration" placeholder="e.g. 5 days" dir="ltr"></div>
-                                            <div class="form-group full-width"><label>التعليمات (Instructions)</label><input type="text" id="medNotes" placeholder="تعليمات الاستخدام (مثل: بعد الأكل)"></div>
+                                            <div class="form-group full-width"><label>التعليمات</label><input type="text" id="medNotes" placeholder="مثل: بعد الأكل"></div>
                                         </div>
-                                        <button type="button" id="btnAddMed" class="btn-primary mt-10" style="width: 100%;"><i class="fa-solid fa-plus"></i> إدراج في الروشتة</button>
+                                        <button type="button" id="btnAddMed" class="btn-primary mt-20" style="width: 100%;"><i class="fa-solid fa-plus"></i> إدراج في الروشتة</button>
                                     </div>
                                     
                                     <div class="table-responsive mt-20">
@@ -369,67 +380,99 @@
                                     </div>
                                 </div>
 
+                                <!-- التبويب 2: الفحص السريري -->
+                                <div id="tab-exam" class="tab-pane hidden">
+                                    <h3 class="section-title mb-10">الفحص العام والتفصيلي</h3>
+                                    <div class="form-group full-width mb-10">
+                                        <label>General</label>
+                                        <textarea id="examGeneral" rows="2" placeholder="Consciousness, Hydration..."></textarea>
+                                    </div>
+                                    <div class="form-grid">
+                                        <div class="form-group"><label>Chest</label><input type="text" id="examResp"></div>
+                                        <div class="form-group"><label>CVS</label><input type="text" id="examCVS"></div>
+                                        <div class="form-group"><label>Abdomen</label><input type="text" id="examAbd"></div>
+                                        <div class="form-group"><label>Neuro/Skin</label><input type="text" id="examNeuro"></div>
+                                    </div>
+                                </div>
+
+                                <!-- التبويب 3: التاريخ المرضي -->
+                                <div id="tab-history" class="tab-pane hidden">
+                                    <h3 class="section-title mb-10">تاريخ الولادة والعائلة</h3>
+                                    <div class="form-grid">
+                                        <div class="form-group"><label>عمر الحمل</label><input type="text" id="histGestational" placeholder="e.g. 38w"></div>
+                                        <div class="form-group"><label>الولادة</label>
+                                            <select id="histDelivery"><option value="">Select...</option><option value="NVD">طبيعي</option><option value="CS">قيصري</option></select>
+                                        </div>
+                                        <div class="form-group"><label>وزن الولادة</label><input type="number" step="0.1" inputmode="decimal" id="histBirthWeight"></div>
+                                        <div class="form-group"><label>حضانات (NICU)</label><input type="text" id="histNICU"></div>
+                                    </div>
+                                    <div class="form-group full-width mt-10">
+                                        <label>تاريخ مرضي وحساسية</label>
+                                        <textarea id="histPastFamily" rows="2"></textarea>
+                                    </div>
+                                </div>
+
+                                <!-- التبويب 6: النمو -->
                                 <div id="tab-growth" class="tab-pane hidden">
-                                    <h3 class="section-title">قياسات الزيارة الحالية للنمو</h3>
+                                    <h3 class="section-title mb-10"><i class="fa-solid fa-chart-line text-primary"></i> تقييم النمو (Growth Assessment)</h3>
                                     <div class="form-grid">
                                         <div class="form-group">
-                                            <label>المرجع الطبي (Reference)</label>
+                                            <label>المرجع الطبي</label>
                                             <select id="gChartType"><option value="WHO">WHO (0-5 Years)</option><option value="CDC">CDC (2-20 Years)</option></select>
                                         </div>
-                                        <div class="form-group"><label>الوزن (Weight - Kg)</label><input type="number" step="0.01" id="gWeight"></div>
-                                        <div class="form-group"><label>الطول (Length/Height - cm)</label><input type="number" step="0.1" id="gHeight"></div>
-                                        <div class="form-group"><label>محيط الرأس (HC - cm)</label><input type="number" step="0.1" id="gHC"></div>
+                                        <div class="form-group"><label>الوزن (Kg)</label><input type="number" step="0.01" inputmode="decimal" id="gWeight"></div>
+                                        <div class="form-group"><label>الطول (cm)</label><input type="number" step="0.1" inputmode="decimal" id="gHeight"></div>
+                                        <div class="form-group"><label>محيط الرأس (cm)</label><input type="number" step="0.1" inputmode="decimal" id="gHC"></div>
                                     </div>
-                                    <button type="button" id="btnCalcGrowth" class="btn-primary mt-10" style="width: 100%;"><i class="fa-solid fa-calculator"></i> تقييم وحساب (Z-Score & Percentile)</button>
-
-                                    <div id="growthResultsBox" class="mt-20 hidden" style="background: #e0f2fe; padding: 15px; border-radius: 8px; border: 1px solid #bae6fd;"></div>
-
-                                    <h3 class="section-title mt-20">مخطط النمو التفاعلي السريري</h3>
+                                    <button type="button" id="btnCalcGrowth" class="btn-primary mt-10" style="width: 100%;"><i class="fa-solid fa-calculator"></i> تقييم ورسم المنحنى</button>
+                                    <div id="growthResultsBox" class="mt-20 hidden" style="background: #f0fdf4; padding: 15px; border-radius: 8px; border: 1px solid #bbf7d0;"></div>
+                                    <h3 class="section-title mt-20 mb-10">المنحنى التفاعلي</h3>
                                     <div class="form-group mb-10">
-                                        <label>المؤشر المعروض:</label>
                                         <select id="gChartIndicator">
-                                            <option value="WFA">الوزن للعمر (Weight-for-Age)</option>
-                                            <option value="LFA">الطول للعمر (Length-for-Age)</option>
-                                            <option value="HCFA">محيط الرأس (HC-for-Age)</option>
-                                            <option value="BMI">مؤشر كتلة الجسم (BMI-for-Age)</option>
+                                            <option value="WFA">الوزن للعمر (WFA)</option>
+                                            <option value="LFA">الطول للعمر (LFA)</option>
+                                            <option value="HCFA">محيط الرأس (HCFA)</option>
+                                            <option value="BMI">مؤشر كتلة الجسم (BMI)</option>
                                         </select>
                                     </div>
-                                    <div style="position: relative; height:350px; width:100%; background: #fff; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px;">
+                                    <div style="position: relative; height:350px; width:100%; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px;">
                                         <canvas id="growthChartCanvas"></canvas>
                                     </div>
                                 </div>
 
+                                <!-- التبويب 7: التطعيمات -->
                                 <div id="tab-vaccines" class="tab-pane hidden">
-                                    <h3 class="section-title">التطعيمات الإضافية (Extra Vaccines)</h3>
-                                    <p class="text-muted" style="margin-bottom:15px; font-size:0.85rem;"><i class="fa-solid fa-circle-info"></i> السجل مستقل ودائم للطفل ويعتمد على جداول مرجعية موثقة.</p>
+                                    <h3 class="section-title mb-10"><i class="fa-solid fa-syringe text-primary"></i> السجل التطعيمي</h3>
                                     <div id="vaccinesListContainer" style="display:flex; flex-direction:column; gap:12px;"></div>
                                 </div>
 
+                                <!-- التبويب 8: الفحوصات والمرفقات -->
                                 <div id="tab-investigations" class="tab-pane hidden">
-                                    <h3 class="section-title">التحاليل والأشعة (Investigations)</h3>
-                                    <div class="form-group full-width">
-                                        <textarea id="invText" rows="3" placeholder="التحاليل المطلوبة أو نتائجها..."></textarea>
+                                    <h3 class="section-title mb-10">الفحوصات (Labs/Imaging)</h3>
+                                    <div class="form-group full-width mb-20">
+                                        <textarea id="invText" rows="2" placeholder="التحاليل المطلوبة..."></textarea>
                                     </div>
-                                    <h3 class="section-title mt-20">إرفاق ملفات طبية (روشتات سابقة / تحاليل)</h3>
+                                    <h3 class="section-title mb-10">المرفقات</h3>
                                     <div class="form-group">
                                         <input type="file" id="fileUpload" accept="image/*,application/pdf" style="margin-bottom: 10px;">
-                                        <button type="button" id="btnUploadFile" class="btn-secondary" style="width: 100%;"><i class="fa-solid fa-upload"></i> رفع الملف وحفظه</button>
+                                        <button type="button" id="btnUploadFile" class="btn-secondary" style="width: 100%;"><i class="fa-solid fa-cloud-arrow-up"></i> رفع للملف</button>
                                         <small id="uploadStatus" class="hidden" style="display:block; margin-top:5px; font-weight:bold;"></small>
                                     </div>
                                     <ul id="filesList" class="mt-20 file-list"></ul>
                                 </div>
 
+                                <!-- التبويب 9: الخطة والمتابعة -->
                                 <div id="tab-plan" class="tab-pane hidden">
-                                    <h3 class="section-title">خطة العلاج والمتابعة (Treatment Plan)</h3>
+                                    <h3 class="section-title mb-10">الخطة والمتابعة (Plan & Follow-up)</h3>
                                     <div class="form-group full-width">
-                                        <textarea id="planNotes" rows="4" placeholder="تعليمات العلاج والرعاية المنزلية لولي الأمر..."></textarea>
+                                        <textarea id="planNotes" rows="3" placeholder="تعليمات للأسرة..."></textarea>
                                     </div>
-                                    <div class="form-grid mt-20">
+                                    <div class="form-grid mt-10">
                                         <div class="form-group">
                                             <label>قرار المتابعة</label>
                                             <select id="planFollowupDecision">
-                                                <option value="None">لا يحتاج لمتابعة محددة (PRN)</option>
-                                                <option value="Required">يحتاج إلى إعادة / استشارة</option>
+                                                <option value="None">عند اللزوم (PRN)</option>
+                                                <option value="Required">يحتاج إستشارة/متابعة</option>
                                             </select>
                                         </div>
                                         <div class="form-group" id="followUpDateContainer" style="display:none;">
@@ -439,16 +482,18 @@
                                     </div>
                                 </div>
 
+                                <!-- التبويب 10: الزيارات السابقة -->
                                 <div id="tab-previous" class="tab-pane hidden">
-                                    <h3 class="section-title">التاريخ المرضي للزيارات المكتملة السابقة</h3>
+                                    <h3 class="section-title mb-10"><i class="fa-solid fa-clock-rotate-left text-primary"></i> الزيارات السابقة</h3>
                                     <div id="previousVisitsContainer"></div>
                                 </div>
                             </form>
 
+                            <!-- الأزرار النهائية (Floating Effect on Mobile) -->
                             <div class="consultation-actions-container">
-                                <button type="button" id="btnSaveDraft" class="btn-secondary btn-save"><i class="fa-solid fa-save"></i> حفظ مسودة</button>
+                                <button type="button" id="btnSaveDraft" class="btn-secondary btn-save"><i class="fa-solid fa-floppy-disk"></i> حفظ مؤقت</button>
                                 <button type="button" id="btnPrintRx" class="btn-secondary btn-print"><i class="fa-solid fa-print"></i> طباعة الروشتة</button>
-                                <button type="button" id="btnCompleteVisit" class="btn-primary btn-complete"><i class="fa-solid fa-check-double"></i> إنهاء الكشف وحفظه</button>
+                                <button type="button" id="btnCompleteVisit" class="btn-primary btn-complete"><i class="fa-solid fa-check-double"></i> اعتماد الكشف وإنهاء</button>
                             </div>
                         </div>
                     </div>
@@ -457,15 +502,15 @@
         </main>
     </div>
 
-    <!-- نافذة إضافة دواء مخصص -->
+    <!-- نافذة إضافة دواء مخصص (Modal) -->
     <div id="customMedModal" class="modal-overlay">
         <div class="modal-content">
-            <h3 class="section-title text-ar" style="margin-bottom: 20px;">إضافة دواء جديد للدليل الدائم للعيادة</h3>
+            <h3 class="section-title text-ar mb-20"><i class="fa-solid fa-plus-circle text-primary"></i> إضافة دواء للدليل</h3>
             <div class="form-grid text-ar">
-                <div class="form-group full-width"><label>الاسم التجاري (Trade Name) <span class="text-danger">*</span></label><input type="text" id="cMedTradeName" placeholder="مثال: Zithromax"></div>
-                <div class="form-group full-width"><label>الاسم العلمي (Scientific Name)</label><input type="text" id="cMedScientificName" placeholder="مثال: Azithromycin"></div>
-                <div class="form-group"><label>التركيز (Concentration)</label><input type="text" id="cMedConcentration" placeholder="مثال: 200 mg/5 mL" dir="ltr"></div>
-                <div class="form-group"><label>الشكل الدوائي (Form)</label>
+                <div class="form-group full-width"><label>الاسم التجاري <span class="text-danger">*</span></label><input type="text" id="cMedTradeName" placeholder="Zithromax"></div>
+                <div class="form-group full-width"><label>المادة الفعالة</label><input type="text" id="cMedScientificName" placeholder="Azithromycin"></div>
+                <div class="form-group"><label>التركيز</label><input type="text" id="cMedConcentration" placeholder="200 mg/5 mL" dir="ltr"></div>
+                <div class="form-group"><label>الشكل الدوائي</label>
                     <select id="cMedForm">
                         <option value="Syrup">شراب (Syrup)</option>
                         <option value="Suspension">معلق (Suspension)</option>
@@ -473,7 +518,7 @@
                         <option value="Tablet">أقراص (Tablet)</option>
                         <option value="Suppository">لبوس (Suppository)</option>
                         <option value="Vial/Ampoule">حقن (Vial/Ampoule)</option>
-                        <option value="Cream/Ointment">كريم/مرهم (Cream/Ointment)</option>
+                        <option value="Cream/Ointment">كريم/مرهم</option>
                         <option value="Inhaler/Respules">بخاخ/جلسات</option>
                         <option value="Other">أخرى</option>
                     </select>
@@ -481,7 +526,7 @@
             </div>
             <div class="d-flex justify-between mt-20">
                 <button type="button" id="btnCancelCustomMed" class="btn-secondary">إلغاء</button>
-                <button type="button" id="btnSaveCustomMed" class="btn-primary"><i class="fa-solid fa-save"></i> حفظ في القاموس</button>
+                <button type="button" id="btnSaveCustomMed" class="btn-primary"><i class="fa-solid fa-cloud-arrow-up"></i> حفظ سحابي</button>
             </div>
         </div>
     </div>
@@ -513,14 +558,13 @@
         </div>
     </div>
 
-    <!-- كود الجافاسكريبت الرئيسي ونظام الحماية والربط (Failsafe & Integrations) -->
+    <!-- كود الجافاسكريبت والربط -->
     <script type="module">
-        // 1. استدعاءات فايربيز (تُحمل من خوادم جوجل لضمان التشغيل دائماً)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
         import { getFirestore, collection, addDoc, getDocs, getDoc, doc, query, where, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
         import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-storage.js";
 
-        // إعدادات فايربيز الأصلية للمشروع (لا تُعدل)
+        // إعدادات فايربيز (لا تعدل)
         const firebaseConfig = {
             apiKey: "AIzaSyDJ2PMemkLDrVWS2PMH9z7glG-yK0QDNsg",
             authDomain: "friends-clinic.firebaseapp.com",
@@ -534,13 +578,12 @@
         const db = getFirestore(app);
         const storage = getStorage(app);
 
-        // متغيرات عامة لحالة الكشف
         let currentVisitId = null; let currentPatientId = null; let currentMRN = null;
         let currentMedications = []; let currentFiles = []; let customMedicinesPool = [];
         let pediatricDiagnoses = []; let pediatricMedicines = []; 
         let vaccineEngine = null; let GrowthCalculator = null; let growthRenderer = null;
 
-        // 2. نظام التحميل الديناميكي للملفات الطبية (Failsafe Module Loader)
+        // Failsafe Loader
         async function loadExternalModules() {
             try { const diag = await import('./js/diagnoses-data.js'); pediatricDiagnoses = diag.pediatricDiagnoses || []; } catch(e) { console.warn("Diagnoses Data not loaded."); }
             try { const meds = await import('./js/medicines-data.js'); pediatricMedicines = meds.pediatricMedicines || []; } catch(e) { console.warn("Medicines Data not loaded."); }
@@ -553,14 +596,13 @@
         }
 
         // ==========================================
-        // تهيئة النظام عند التحميل
+        // تهيئة النظام
         // ==========================================
         document.addEventListener("DOMContentLoaded", async () => {
             setupTabs();
-            // أولوية قصوى: تشغيل الاستقبال فوراً بغض النظر عن أي ملفات خارجية
+            setupMobileNav(); // تفعيل قائمة الموبايل الجديدة
             await loadDashboard(); 
             
-            // ثانياً: تحميل المحركات الخارجية وباقي الداتا في الخلفية
             await loadExternalModules();
             loadCustomMedicines();
             setupAutocompletes();
@@ -572,19 +614,13 @@
         });
 
         // ==========================================
-        // دوال الواجهة المساعدة (UI Helpers)
+        // أدوات الواجهة والقوائم المحسنة
         // ==========================================
         function showSection(sectionId) {
-            document.querySelectorAll('.page-section').forEach(sec => {
-                sec.classList.add('hidden');
-                sec.classList.remove('active'); // تم الإصلاح لضمان إخفاء الأقسام بشكل كامل
-            });
+            document.querySelectorAll('.page-section').forEach(sec => { sec.classList.add('hidden'); sec.classList.remove('active'); });
             document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
             const target = document.getElementById(sectionId);
-            if(target) {
-                target.classList.remove('hidden');
-                target.classList.add('active'); // تم الإصلاح لضمان إظهار القسم الجديد بوضوح
-            }
+            if(target) { target.classList.remove('hidden'); target.classList.add('active'); }
             const activeLink = document.querySelector(`[data-target="${sectionId}"]`);
             if(activeLink) activeLink.classList.add('active');
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -595,19 +631,19 @@
                 tab.addEventListener('click', (e) => {
                     document.querySelectorAll('#clinicalTabs li').forEach(t => t.classList.remove('active'));
                     e.currentTarget.classList.add('active');
-                    
-                    document.querySelectorAll('.tab-pane').forEach(p => {
-                        p.classList.add('hidden');
-                        p.classList.remove('active'); // إزالة التنشيط من الباقي
-                    });
+                    document.querySelectorAll('.tab-pane').forEach(p => { p.classList.add('hidden'); p.classList.remove('active'); });
                     
                     const targetPane = document.getElementById(e.currentTarget.getAttribute('data-tab'));
-                    if(targetPane) {
-                        targetPane.classList.remove('hidden');
-                        targetPane.classList.add('active'); // إضافة التنشيط للتبويب المختار ليظهر
-                    }
+                    if(targetPane) { targetPane.classList.remove('hidden'); targetPane.classList.add('active'); }
                     
-                    e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                    // تحديث اسم القسم في زر الموبايل وإغلاق القائمة
+                    const mobileLabel = document.getElementById('currentTabLabel');
+                    if(mobileLabel) {
+                        mobileLabel.innerHTML = e.currentTarget.innerHTML;
+                        document.getElementById('clinicalNavMenu').classList.remove('show');
+                        document.querySelector('#mobileNavToggle i').classList.remove('fa-chevron-up');
+                        document.querySelector('#mobileNavToggle i').classList.add('fa-chevron-down');
+                    }
                 });
             });
 
@@ -616,6 +652,33 @@
                 if (e.target.value === 'Required') dateContainer.style.display = 'block';
                 else { dateContainer.style.display = 'none'; document.getElementById('planFollowupDate').value = ''; }
             });
+        }
+
+        function setupMobileNav() {
+            const toggleBtn = document.getElementById('mobileNavToggle');
+            const navMenu = document.getElementById('clinicalNavMenu');
+            if(toggleBtn && navMenu) {
+                toggleBtn.addEventListener('click', () => {
+                    navMenu.classList.toggle('show');
+                    const icon = toggleBtn.querySelector('i.fa-solid:last-child');
+                    if(navMenu.classList.contains('show')) {
+                        icon.classList.remove('fa-chevron-down'); icon.classList.add('fa-chevron-up');
+                    } else {
+                        icon.classList.remove('fa-chevron-up'); icon.classList.add('fa-chevron-down');
+                    }
+                });
+            }
+        }
+
+        // ==========================================
+        // أدوات التأخير الذكي للبحث (Debounce Performance)
+        // ==========================================
+        function debounce(func, wait) {
+            let timeout;
+            return function(...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), wait);
+            };
         }
 
         function showLoading(text) { document.getElementById('loadingText').innerText = text; document.getElementById('loadingOverlay').classList.remove('hidden'); }
@@ -638,16 +701,13 @@
         // الربط بالاستقبال (Dual-Clinic Integration)
         // ==========================================
         async function loadDashboard() {
-            showLoading("جاري تحميل الحجوزات من العيادات...");
+            showLoading("تحديث القائمة...");
             try {
                 const dateStr = getTodayStr(); let apps = [];
-                
-                // 1. الاستقبال الأول: نيو كيدز
                 const q1 = query(collection(db, "appointments"), where("date", "==", dateStr));
                 const snap1 = await getDocs(q1);
                 snap1.forEach(doc => apps.push({ ...doc.data(), id: doc.id, appCol: 'appointments', patCol: 'patients', sourceName: 'NEO KIDS' }));
 
-                // 2. الاستقبال الثاني: مجمع الأصدقاء
                 const q2 = query(collection(db, "friends_appointments"), where("date", "==", dateStr));
                 const snap2 = await getDocs(q2);
                 snap2.forEach(doc => apps.push({ ...doc.data(), id: doc.id, appCol: 'friends_appointments', patCol: 'friends_patients', sourceName: 'الأصدقاء' }));
@@ -662,14 +722,10 @@
 
                     let actionBtn = '';
                     if(app.status === 'Waiting' || app.status === 'In Consultation') {
-                        // تمرير معطيات الجلسة لتأمين الفتح الصحيح
                         actionBtn = `<button type="button" class="btn-primary btn-small btn-start-visit" 
-                            data-appid="${app.id}" 
-                            data-patientid="${app.patientId}" 
-                            data-mrn="${app.mrn}" 
+                            data-appid="${app.id}" data-patientid="${app.patientId}" data-mrn="${app.mrn}" 
                             data-complaint="${encodeURIComponent(app.complaint || '')}" 
-                            data-appcol="${app.appCol}" 
-                            data-patcol="${app.patCol}"><i class="fa-solid fa-folder-open"></i> فتح الملف</button>`;
+                            data-appcol="${app.appCol}" data-patcol="${app.patCol}"><i class="fa-solid fa-file-medical"></i> الكشف</button>`;
                     } else { actionBtn = `<span class="text-muted"><i class="fa-solid fa-check-double"></i> مكتمل</span>`; }
 
                     const badgeClass = app.status === 'In Consultation' ? 'consultation' : (app.status === 'Completed' ? 'completed' : 'waiting');
@@ -684,7 +740,6 @@
                 document.querySelectorAll('.btn-start-visit').forEach(btn => {
                     btn.addEventListener('click', e => {
                         const d = e.currentTarget.dataset;
-                        // تمرير المعطيات المكتوبة في أزرار الـ HTML
                         window.startConsultation(d.appid, d.patientid, d.mrn, d.complaint, d.appcol, d.patcol);
                     });
                 });
@@ -692,30 +747,21 @@
                 document.getElementById('dashWaitingCount').innerText = wCount;
                 document.getElementById('dashConsultingCount').innerText = cCount;
                 document.getElementById('dashCompletedCount').innerText = dCount;
-            } catch (e) { console.error("خطأ أثناء جلب الداتا:", e); showToast("خطأ في جلب بيانات الحجوزات", "error"); }
+            } catch (e) { console.error("خطأ:", e); showToast("خطأ في الاتصال بالاستقبال", "error"); }
             hideLoading();
         }
 
-        // ==========================================
-        // 🚨 إصلاح خلل "زر بدء الاستشارة"
-        // ==========================================
         window.startConsultation = async (appId, patientId, mrn, encodedComplaint, rawAppCol, rawPatCol) => {
-            showLoading("تجهيز السجل الطبي والمحركات...");
+            showLoading("تجهيز السجل...");
             try {
-                // الحماية ضد خطأ نصوص undefined من الـ HTML Datasets
                 const appCol = (rawAppCol && rawAppCol !== "undefined") ? rawAppCol : "appointments";
                 const patCol = (rawPatCol && rawPatCol !== "undefined") ? rawPatCol : "patients";
-
                 const receptionComplaint = decodeURIComponent(encodedComplaint);
                 
-                // جلب المريض من السجل الصحيح (العيادة الصحيحة)
                 const patientSnap = await getDoc(doc(db, patCol, patientId));
-                if(!patientSnap.exists()) {
-                    throw new Error(`لم يتم العثور على بيانات المريض في قاعدة البيانات (${patCol})`);
-                }
+                if(!patientSnap.exists()) throw new Error("لم يتم العثور على المريض");
                 const patient = patientSnap.data();
 
-                // التأكد من عدم تكرار الزيارة، أو إنشاء زيارة جديدة
                 const q = query(collection(db, "visits"), where("appId", "==", appId));
                 const vSnap = await getDocs(q);
                 let visit;
@@ -731,7 +777,6 @@
                 currentVisitId = visit.visitId; currentPatientId = patientId; currentMRN = mrn;
                 currentMedications = visit.medications || []; currentFiles = visit.files || []; 
 
-                // تعبئة واجهة الكشف محمية بـ try..catch لضمان عدم توقف النظام عند خطأ بسيط
                 try {
                     document.getElementById('phName').innerText = patient.fullName || '--';
                     document.getElementById('phMRN').innerText = mrn;
@@ -752,76 +797,72 @@
                     if (visit.treatmentPlan) { setVal('planNotes', visit.treatmentPlan.notes); setVal('planFollowupDecision', visit.treatmentPlan.followUpDecision || 'None'); setVal('planFollowupDate', visit.treatmentPlan.followUpDate); document.getElementById('planFollowupDecision').dispatchEvent(new Event('change')); }
 
                     renderMedicationsTable(); renderFilesList(); loadPreviousVisits();
-                } catch (uiError) {
-                    console.error("خطأ في تعبئة بعض الحقول:", uiError);
-                }
+                } catch (e) { console.error("UI Error:", e); }
                 
-                // التبديل إلى شاشة الكشف (تمت هندسة دالة showSection لتصبح مقاومة للأخطاء)
                 showSection('consultationSection');
                 document.querySelector('[data-tab="tab-overview"]').click();
                 
-                // تشغيل التطعيمات إن وجد المحرك
                 if(vaccineEngine) await renderVaccinationDashboard(patientId, patient.dob);
 
-            } catch (e) { 
-                console.error("خطأ كامل في بدء الاستشارة:", e); 
-                showToast("حدث خطأ في فتح الملف الطبي. راجع الاتصال بالاستقبال.", "error"); 
-            }
+            } catch (e) { console.error(e); showToast("خطأ في الربط ببيانات المريض", "error"); }
             hideLoading();
         };
 
         // ==========================================
-        // Autocompletes (Diagnoses & Medicines)
+        // Autocompletes (مع Debounce للأداء)
         // ==========================================
         function setupAutocompletes() {
             const diagInput = document.getElementById('diagPrimary');
             const diagResults = document.getElementById('diagAutocompleteResults');
-            if (diagInput && diagResults) {
-                diagInput.addEventListener('input', function() {
-                    const val = this.value.toLowerCase().trim(); diagResults.innerHTML = '';
-                    if (!val) { diagResults.style.display = 'none'; return; }
-                    const matches = pediatricDiagnoses.filter(d => 
-                        d.titleEn.toLowerCase().includes(val) || d.code.toLowerCase().includes(val) || 
-                        (d.titleAr && d.titleAr.includes(val)) || (d.abbreviations && d.abbreviations.some(a => a.toLowerCase().includes(val)))
-                    ).slice(0, 15);
-                    if (matches.length > 0) {
-                        matches.forEach(m => {
-                            const div = document.createElement('div'); div.className = 'autocomplete-item';
-                            div.innerHTML = `<strong>${m.code}</strong> <span class="diag-name">${m.titleEn}</span> <small>${m.titleAr || ''}</small>`;
-                            div.addEventListener('click', () => { diagInput.value = `${m.code} - ${m.titleEn}`; diagResults.style.display = 'none'; });
-                            diagResults.appendChild(div);
-                        });
-                        diagResults.style.display = 'block';
-                    } else { diagResults.style.display = 'none'; }
-                });
-            }
+            
+            const handleDiagSearch = debounce(function(e) {
+                const val = e.target.value.toLowerCase().trim(); diagResults.innerHTML = '';
+                if (!val) { diagResults.style.display = 'none'; return; }
+                const matches = pediatricDiagnoses.filter(d => 
+                    d.titleEn.toLowerCase().includes(val) || d.code.toLowerCase().includes(val) || 
+                    (d.titleAr && d.titleAr.includes(val)) || (d.abbreviations && d.abbreviations.some(a => a.toLowerCase().includes(val)))
+                ).slice(0, 15);
+                if (matches.length > 0) {
+                    matches.forEach(m => {
+                        const div = document.createElement('div'); div.className = 'autocomplete-item';
+                        div.innerHTML = `<strong>${m.code}</strong> <span class="diag-name">${m.titleEn}</span> <small>${m.titleAr || ''}</small>`;
+                        div.addEventListener('click', () => { diagInput.value = `${m.code} - ${m.titleEn}`; diagResults.style.display = 'none'; });
+                        diagResults.appendChild(div);
+                    });
+                    diagResults.style.display = 'block';
+                } else { diagResults.style.display = 'none'; }
+            }, 300); // 300ms تأخير
+            
+            if (diagInput && diagResults) diagInput.addEventListener('input', handleDiagSearch);
 
             const medInput = document.getElementById('medName');
             const medResults = document.getElementById('medAutocompleteResults');
-            if (medInput && medResults) {
-                medInput.addEventListener('input', function() {
-                    const val = this.value.toLowerCase().trim(); medResults.innerHTML = '';
-                    if (!val) { medResults.style.display = 'none'; return; }
-                    const pool = [...pediatricMedicines, ...customMedicinesPool];
-                    const matches = pool.filter(m => 
-                        (m.tradeName && m.tradeName.toLowerCase().includes(val)) || (m.scientificName && m.scientificName.toLowerCase().includes(val)) ||
-                        (m.synonyms && m.synonyms.some(s => s.toLowerCase().includes(val)))
-                    ).slice(0, 10);
-                    if (matches.length > 0) {
-                        matches.forEach(m => {
-                            const div = document.createElement('div'); div.className = 'autocomplete-item';
-                            const badge = m.isCustom ? `<span class="custom-badge"><i class="fa-solid fa-user-doctor"></i> إضافة العيادة</span>` : '';
-                            div.innerHTML = `<strong>${m.tradeName}</strong> ${badge} <small>${m.scientificName || ''} | ${m.concentration || ''} | ${m.form || ''}</small>`;
-                            div.addEventListener('click', () => { 
-                                medInput.value = `${m.tradeName} (${m.concentration}) - ${m.form}`; 
-                                medResults.style.display = 'none'; document.getElementById('medDose').focus(); 
-                            });
-                            medResults.appendChild(div);
+            
+            const handleMedSearch = debounce(function(e) {
+                const val = e.target.value.toLowerCase().trim(); medResults.innerHTML = '';
+                if (!val) { medResults.style.display = 'none'; return; }
+                const pool = [...pediatricMedicines, ...customMedicinesPool];
+                const matches = pool.filter(m => 
+                    (m.tradeName && m.tradeName.toLowerCase().includes(val)) || (m.scientificName && m.scientificName.toLowerCase().includes(val)) ||
+                    (m.synonyms && m.synonyms.some(s => s.toLowerCase().includes(val)))
+                ).slice(0, 10);
+                if (matches.length > 0) {
+                    matches.forEach(m => {
+                        const div = document.createElement('div'); div.className = 'autocomplete-item';
+                        const badge = m.isCustom ? `<span class="custom-badge">مخصص</span>` : '';
+                        div.innerHTML = `<strong>${m.tradeName}</strong> ${badge} <small>${m.scientificName || ''} | ${m.concentration || ''} | ${m.form || ''}</small>`;
+                        div.addEventListener('click', () => { 
+                            medInput.value = `${m.tradeName} (${m.concentration}) - ${m.form}`; 
+                            medResults.style.display = 'none'; document.getElementById('medDose').focus(); 
                         });
-                        medResults.style.display = 'block';
-                    } else { medResults.style.display = 'none'; }
-                });
-            }
+                        medResults.appendChild(div);
+                    });
+                    medResults.style.display = 'block';
+                } else { medResults.style.display = 'none'; }
+            }, 300);
+
+            if (medInput && medResults) medInput.addEventListener('input', handleMedSearch);
+
             document.addEventListener('click', e => {
                 if (e.target !== diagInput && e.target !== diagResults && diagResults) diagResults.style.display = 'none';
                 if (e.target !== medInput && e.target !== medResults && medResults) medResults.style.display = 'none';
@@ -829,13 +870,12 @@
         }
 
         // ==========================================
-        // الأدوية المخصصة (Custom Medicines)
+        // الأدوية المخصصة
         // ==========================================
         async function loadCustomMedicines() {
             try {
                 const q = query(collection(db, "custom_medicines"));
-                const snap = await getDocs(q);
-                customMedicinesPool = [];
+                const snap = await getDocs(q); customMedicinesPool = [];
                 snap.forEach(doc => customMedicinesPool.push({ id: doc.id, isCustom: true, ...doc.data() }));
             } catch (e) { console.error("Error loading custom medicines", e); }
         }
@@ -848,48 +888,36 @@
             const tradeName = document.getElementById('cMedTradeName').value.trim();
             if (!tradeName) return showToast("الاسم التجاري مطلوب", "error");
             
-            const btn = document.getElementById('btnSaveCustomMed');
-            btn.disabled = true; btn.innerText = "جاري الحفظ...";
+            const btn = document.getElementById('btnSaveCustomMed'); btn.disabled = true; btn.innerText = "جاري الحفظ...";
             try {
-                const newMed = {
-                    tradeName, scientificName: document.getElementById('cMedScientificName').value.trim(),
-                    concentration: document.getElementById('cMedConcentration').value.trim(),
-                    form: document.getElementById('cMedForm').value, synonyms: [], addedAt: serverTimestamp()
-                };
+                const newMed = { tradeName, scientificName: document.getElementById('cMedScientificName').value.trim(), concentration: document.getElementById('cMedConcentration').value.trim(), form: document.getElementById('cMedForm').value, synonyms: [], addedAt: serverTimestamp() };
                 const docRef = await addDoc(collection(db, "custom_medicines"), newMed);
                 customMedicinesPool.push({ id: docRef.id, isCustom: true, ...newMed });
-                showToast("تم الحفظ في الدليل الدائم", "success");
-                modalCustomMed.classList.remove('active');
+                showToast("تم الحفظ في الدليل الدائم", "success"); modalCustomMed.classList.remove('active');
                 ['cMedTradeName','cMedScientificName','cMedConcentration'].forEach(id => document.getElementById(id).value = '');
             } catch(e) { showToast("خطأ أثناء الحفظ", "error"); }
-            finally { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-save"></i> حفظ في القاموس'; }
+            finally { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> حفظ سحابي'; }
         });
 
         // ==========================================
-        // إدارة الروشتة (Medications Rx Logic)
+        // الروشتة (Rx)
         // ==========================================
         document.getElementById('btnAddMed').addEventListener('click', () => {
             const name = document.getElementById('medName').value.trim();
             if(!name) return showToast("يرجى كتابة اسم الدواء", "error");
-            currentMedications.push({ 
-                name, dose: document.getElementById('medDose').value.trim(), 
-                duration: document.getElementById('medDuration').value.trim(), notes: document.getElementById('medNotes').value.trim() 
-            });
-            renderMedicationsTable();
-            ['medName', 'medDose', 'medDuration', 'medNotes'].forEach(id => document.getElementById(id).value = '');
+            currentMedications.push({ name, dose: document.getElementById('medDose').value.trim(), duration: document.getElementById('medDuration').value.trim(), notes: document.getElementById('medNotes').value.trim() });
+            renderMedicationsTable(); ['medName', 'medDose', 'medDuration', 'medNotes'].forEach(id => document.getElementById(id).value = '');
         });
 
         window.removeMed = (index) => { currentMedications.splice(index, 1); renderMedicationsTable(); };
         function renderMedicationsTable() {
             const tbody = document.querySelector('#medsTable tbody'); tbody.innerHTML = '';
             if (currentMedications.length === 0) { tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--text-muted);">الروشتة فارغة</td></tr>`; return; }
-            currentMedications.forEach((med, i) => {
-                tbody.innerHTML += `<tr><td><strong>${med.name}</strong></td><td dir="ltr">${med.dose}</td><td dir="ltr">${med.duration}</td><td>${med.notes}</td><td><button type="button" class="btn-danger btn-small" onclick="window.removeMed(${i})"><i class="fa-solid fa-trash"></i></button></td></tr>`;
-            });
+            currentMedications.forEach((med, i) => { tbody.innerHTML += `<tr><td><strong>${med.name}</strong></td><td dir="ltr">${med.dose}</td><td dir="ltr">${med.duration}</td><td>${med.notes}</td><td><button type="button" class="btn-danger btn-small" onclick="window.removeMed(${i})"><i class="fa-solid fa-trash"></i></button></td></tr>`; });
         }
 
         // ==========================================
-        // الحفظ وإنهاء الكشف (Save & Complete)
+        // حفظ وإنهاء الكشف
         // ==========================================
         function buildVisitDataObject() {
             const getVal = (id) => document.getElementById(id) ? document.getElementById(id).value : '';
@@ -921,15 +949,15 @@
 
         document.getElementById('btnSaveDraft').addEventListener('click', async () => {
             showLoading("جاري الحفظ...");
-            try { await saveVisitData(currentVisitId, buildVisitDataObject(), false); showToast("تم حفظ المسودة بنجاح"); } 
+            try { await saveVisitData(currentVisitId, buildVisitDataObject(), false); showToast("تم الحفظ بنجاح"); } 
             catch(e) { showToast("خطأ في الحفظ", "error"); } hideLoading();
         });
 
         document.getElementById('btnCompleteVisit').addEventListener('click', async () => {
-            if(!document.getElementById('diagPrimary').value.trim()) { showToast("التشخيص الأساسي مطلوب لإنهاء الكشف", "error"); document.querySelector('[data-tab="tab-diagnosis"]').click(); return; }
-            if(confirm("تأكيد إنهاء الكشف الطبي؟ لن يتم إزالة التاريخ المرضي للطفل.")) {
-                showLoading("جاري إنهاء الكشف واعتماده...");
-                try { await saveVisitData(currentVisitId, buildVisitDataObject(), true); showToast("تم إكمال الزيارة بنجاح"); showSection('dashboardSection'); loadDashboard(); } 
+            if(!document.getElementById('diagPrimary').value.trim()) { showToast("التشخيص مطلوب لإنهاء الكشف", "error"); document.querySelector('[data-tab="tab-diagnosis"]').click(); return; }
+            if(confirm("تأكيد اعتماد الكشف وإنهاء الزيارة؟")) {
+                showLoading("جاري الإنهاء...");
+                try { await saveVisitData(currentVisitId, buildVisitDataObject(), true); showToast("تم إكمال الزيارة"); showSection('dashboardSection'); loadDashboard(); } 
                 catch(e) { showToast("خطأ أثناء الإنهاء", "error"); } hideLoading();
             }
         });
@@ -945,18 +973,18 @@
             
             document.getElementById('rxNotes').innerText = document.getElementById('planNotes').value;
             const fDec = document.getElementById('planFollowupDecision').value; const fDate = document.getElementById('planFollowupDate').value;
-            document.getElementById('rxNextVisit').innerHTML = (fDec === 'Required' && fDate) ? `<strong>الاستشارة / الإعادة:</strong> <span dir="ltr">${fDate}</span>` : '';
+            document.getElementById('rxNextVisit').innerHTML = (fDec === 'Required' && fDate) ? `<strong>المتابعة:</strong> <span dir="ltr">${fDate}</span>` : '';
             window.print();
         });
 
         // ==========================================
-        // محرك النمو التفاعلي (Growth Engine)
+        // Growth Engine & Vaccines
         // ==========================================
         document.getElementById('btnCalcGrowth')?.addEventListener('click', updateGrowthUI);
         document.getElementById('gChartIndicator')?.addEventListener('change', updateGrowthUI);
 
         async function updateGrowthUI() {
-            if(!GrowthCalculator || !growthRenderer) { showToast("محرك النمو غير محمل (اربط ملف growth-engine.js)", "error"); return; }
+            if(!GrowthCalculator || !growthRenderer) { showToast("محرك النمو غير متاح الآن", "error"); return; }
             const weight = parseFloat(document.getElementById('gWeight').value); const height = parseFloat(document.getElementById('gHeight').value); const hc = parseFloat(document.getElementById('gHC').value);
             const ref = document.getElementById('gChartType').value; const indicator = document.getElementById('gChartIndicator').value;
             if (!weight && !height && !hc) return showToast("أدخل قياساً واحداً على الأقل", "error");
@@ -966,19 +994,19 @@
             const ageMonths = GrowthCalculator.getExactAgeInMonths(dobStr, new Date());
             
             const resultsBox = document.getElementById('growthResultsBox'); resultsBox.classList.remove('hidden');
-            let html = `<strong style="color:var(--primary-color);"><i class="fa-solid fa-chart-line"></i> التقييم السريري الدقيق:</strong><ul style="margin-top:10px; padding-right:20px; line-height: 1.8;">`;
+            let html = `<strong style="color:var(--primary-color);"><i class="fa-solid fa-chart-line"></i> التقييم السريري الدقيق:</strong><ul style="margin-top:10px;">`;
             
             const renderEval = (ind, val, name) => {
                 if (!val) return '';
                 const res = GrowthCalculator.evaluateMeasurement(ind, val, ageMonths, document.getElementById('phGender').innerText, ref);
-                if (res.error) return `<li><strong>${name}:</strong> ${val} <span class="text-muted" style="font-size:0.85em;">(${res.error})</span></li>`;
+                if (res.error) return `<li><strong>${name}:</strong> ${val} <span class="text-muted">(${res.error})</span></li>`;
                 let color = (Math.abs(res.zScore) >= 2) ? 'var(--danger-color)' : 'var(--success-color)';
-                return `<li><strong>${name}:</strong> ${val} | <span style="color:${color}; font-weight:bold;">Z: ${res.zScore}</span> | P: ${res.percentile}% <br><small style="color:var(--text-muted);"><i class="fa-solid fa-caret-left"></i> <strong>التقييم:</strong> ${res.interpretation} (المرجع: ${res.referenceUsed})</small></li>`;
+                return `<li><strong>${name}:</strong> ${val} | <span style="color:${color}; font-weight:bold;">Z: ${res.zScore}</span> | P: ${res.percentile}% <br><small class="text-muted">${res.interpretation}</small></li>`;
             };
 
             html += renderEval('WFA', weight, 'الوزن (كجم)');
-            if (height) html += `<li><strong>الطول:</strong> ${height} سم <span class="text-muted" style="font-size:0.85em;">(يتطلب جداول LFA)</span></li>`;
-            if (hc) html += `<li><strong>محيط الرأس:</strong> ${hc} سم <span class="text-muted" style="font-size:0.85em;">(يتطلب جداول HCFA)</span></li>`;
+            if (height) html += `<li><strong>الطول:</strong> ${height} سم</li>`;
+            if (hc) html += `<li><strong>الرأس:</strong> ${hc} سم</li>`;
             resultsBox.innerHTML = html + `</ul>`;
 
             let pastVisits = []; try { pastVisits = await getPreviousVisits(currentPatientId, currentVisitId); } catch(e){}
@@ -1003,16 +1031,13 @@
             growthRenderer.render(indicator, historicalPoints);
         }
 
-        // ==========================================
-        // التطعيمات (Vaccines Logic)
-        // ==========================================
         window.saveVaccineDose = async (patientId, vaccineId, doseNum, dateGiven, source = "Clinic") => {
             if (!dateGiven) return showToast("الرجاء تحديد تاريخ الجرعة", "error");
             try {
                 await addDoc(collection(db, "vaccination_records"), { patientId, vaccineId, doseNum: parseInt(doseNum), dateGiven, source, recordedAt: serverTimestamp() });
-                showToast("تم توثيق الجرعة بالسجل الدائم للطفل", "success");
+                showToast("تم توثيق الجرعة", "success");
                 await renderVaccinationDashboard(patientId, document.getElementById('phDOB').innerText);
-            } catch (e) { showToast("خطأ في توثيق الجرعة", "error"); console.error(e); }
+            } catch (e) { showToast("خطأ في التوثيق", "error"); console.error(e); }
         };
 
         async function renderVaccinationDashboard(patientId, dobStr) {
@@ -1026,15 +1051,15 @@
                 const report = vaccineEngine.generatePatientReport(dobStr, history);
                 container.innerHTML = '';
                 report.forEach(v => {
-                    let badge = v.status === 'Completed' ? '<span class="badge completed">مكتمل</span>' : (v.status === 'Due Now' ? '<span class="badge consultation" style="background:#fef08a;color:#854d0e">مستحق الآن</span>' : (v.status === 'Overdue' ? '<span class="badge waiting" style="background:#fee2e2;color:#991b1b">متأخر</span>' : `<span class="badge" style="background:#e0f2fe;color:#0369a1">${v.status}</span>`));
-                    let inputHtml = (v.status !== 'Completed' && !v.status.includes('Ineligible')) ? `<div class="mt-10 form-grid" style="align-items:center;"><input type="date" id="date_${v.vaccineId}" value="${getTodayStr()}"><button type="button" class="btn-primary btn-small" onclick="window.saveVaccineDose('${patientId}', '${v.vaccineId}', ${v.dosesGiven + 1}, document.getElementById('date_${v.vaccineId}').value)"><i class="fa-solid fa-syringe"></i> توثيق الجرعة ${v.dosesGiven + 1}</button></div>` : '';
-                    container.innerHTML += `<div class="card" style="margin-bottom:10px; padding:15px; border:1px solid var(--border-color); box-shadow:none;"><div class="d-flex justify-between align-center"><strong style="color:var(--primary-color);">${v.name}</strong> ${badge}</div><p style="margin:8px 0; color:var(--text-muted); font-size:0.9rem;"><strong>تقييم النظام:</strong> ${v.alert} <br><strong>الجرعات الموثقة:</strong> ${v.dosesGiven} من ${v.totalDoses}</p>${inputHtml}</div>`;
+                    let badge = v.status === 'Completed' ? '<span class="badge completed">مكتمل</span>' : (v.status === 'Due Now' ? '<span class="badge consultation" style="background:#fef08a;color:#854d0e">مستحق</span>' : `<span class="badge" style="background:#e0f2fe;color:#0369a1">${v.status}</span>`);
+                    let inputHtml = (v.status !== 'Completed' && !v.status.includes('Ineligible')) ? `<div class="mt-10 form-grid" style="align-items:center;"><input type="date" id="date_${v.vaccineId}" value="${getTodayStr()}"><button type="button" class="btn-primary btn-small" onclick="window.saveVaccineDose('${patientId}', '${v.vaccineId}', ${v.dosesGiven + 1}, document.getElementById('date_${v.vaccineId}').value)"><i class="fa-solid fa-syringe"></i> توثيق</button></div>` : '';
+                    container.innerHTML += `<div class="card" style="margin-bottom:10px; padding:15px; border:1px solid var(--border-color); box-shadow:none;"><div class="d-flex justify-between align-center"><strong style="color:var(--primary-color);">${v.name}</strong> ${badge}</div><p style="margin:8px 0; color:var(--text-muted); font-size:0.9rem;">${v.alert} <br><strong>الجرعات:</strong> ${v.dosesGiven}/${v.totalDoses}</p>${inputHtml}</div>`;
                 });
-            } catch (e) { container.innerHTML = '<p class="text-danger">خطأ في استدعاء السجل التطعيمي.</p>'; console.error(e); }
+            } catch (e) { container.innerHTML = '<p class="text-danger">خطأ في السجل.</p>'; }
         }
 
         // ==========================================
-        // التحاليل والمرفقات والزيارات السابقة
+        // التحاليل والزيارات السابقة
         // ==========================================
         async function getPreviousVisits(patientId, excludeVisitId) {
             const q = query(collection(db, "visits"), where("patientId", "==", patientId), where("status", "==", "Completed"));
@@ -1045,12 +1070,12 @@
 
         document.getElementById('btnUploadFile').addEventListener('click', async () => {
             const fileInput = document.getElementById('fileUpload'); const file = fileInput.files[0];
-            if(!file) return showToast("اختر ملفاً أولاً", "error");
-            const lbl = document.getElementById('uploadStatus'); lbl.classList.remove('hidden'); lbl.innerText = "جاري الرفع...";
+            if(!file) return showToast("اختر ملفاً", "error");
+            const lbl = document.getElementById('uploadStatus'); lbl.classList.remove('hidden'); lbl.innerText = "الرفع جاري...";
             document.getElementById('btnUploadFile').disabled = true;
             try {
-                const meta = await uploadMedicalFile(file, currentPatientId, currentVisitId, (p) => lbl.innerText = `جاري الرفع ${Math.round(p)}%`);
-                lbl.innerText = "تم الرفع بنجاح!"; lbl.style.color = "var(--success-color)";
+                const meta = await uploadMedicalFile(file, currentPatientId, currentVisitId, (p) => lbl.innerText = `الرفع ${Math.round(p)}%`);
+                lbl.innerText = "تم الرفع!"; lbl.style.color = "var(--success-color)";
                 currentFiles.push({ fileName: meta.fileName, downloadURL: meta.downloadURL }); renderFilesList();
                 fileInput.value = ""; setTimeout(() => lbl.classList.add('hidden'), 4000);
             } catch(e) { lbl.innerText = "فشل الرفع."; lbl.style.color = "var(--danger-color)"; } 
@@ -1076,17 +1101,17 @@
         }
 
         async function loadPreviousVisits() {
-            const container = document.getElementById('previousVisitsContainer'); container.innerHTML = '<p class="text-muted">جاري تحميل التاريخ المرضي...</p>';
+            const container = document.getElementById('previousVisitsContainer'); container.innerHTML = '<p class="text-muted">جاري تحميل التاريخ...</p>';
             try {
                 const visits = await getPreviousVisits(currentPatientId, currentVisitId);
-                if(visits.length === 0) { container.innerHTML = '<p class="text-muted">لا توجد زيارات سابقة مكتملة.</p>'; return; }
+                if(visits.length === 0) { container.innerHTML = '<p class="text-muted">لا يوجد زيارات سابقة مكتملة.</p>'; return; }
                 container.innerHTML = '';
                 visits.forEach(v => {
                     const dateStr = v.createdAt?.toDate ? v.createdAt.toDate().toLocaleDateString('ar-EG') : new Date().toLocaleDateString('ar-EG');
                     const diag = v.diagnoses?.primary || 'غير مسجل';
                     container.innerHTML += `<div class="card" style="padding:15px; margin-bottom:10px; background:#f8fafc; border:1px solid var(--border-color); box-shadow:none;"><strong><i class="fa-regular fa-calendar"></i> ${dateStr}</strong><p style="color:var(--primary-color); margin:8px 0;"><strong>التشخيص:</strong> ${diag}</p><p style="margin:0; font-size:0.9rem; color:var(--text-muted);"><strong>الشكوى:</strong> ${v.chiefComplaint || '-'}</p></div>`;
                 });
-            } catch(e) { container.innerHTML = '<p class="text-danger">خطأ في التحميل.</p>'; }
+            } catch(e) { container.innerHTML = '<p class="text-danger">خطأ التحميل.</p>'; }
         }
     </script>
 </body>
