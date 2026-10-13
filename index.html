@@ -1250,15 +1250,17 @@
             });
         }
 
-        // متغير عالمي لحفظ الزيارات مؤقتاً لتسهيل العرض
-        window.patientVisitHistory = [];
+        // ==========================================
+        // السجل المرضي للزيارات السابقة كاملة
+        // ==========================================
+        window.patientVisitHistory = []; // متغير لحفظ الزيارات بالكامل
 
         async function loadPreviousVisits() {
             const container = document.getElementById('previousVisitsContainer'); 
             container.innerHTML = '<p class="text-muted">جاري تحميل التاريخ المرضي...</p>';
             try {
                 const visits = await getPreviousVisits(currentPatientId, currentVisitId);
-                window.patientVisitHistory = visits; // حفظ الزيارات في المتغير
+                window.patientVisitHistory = visits;
 
                 if(visits.length === 0) { container.innerHTML = '<p class="text-muted">لا توجد زيارات سابقة مكتملة.</p>'; return; }
                 container.innerHTML = '';
@@ -1267,7 +1269,6 @@
                     const dateStr = v.createdAt?.toDate ? v.createdAt.toDate().toLocaleDateString('ar-EG') : new Date().toLocaleDateString('ar-EG');
                     const diag = v.diagnoses?.primary || 'غير مسجل';
                     
-                    // الكارت أصبح زرار يمكن الضغط عليه ويستدعي دالة العرض برقم الزيارة (index)
                     container.innerHTML += `
                     <div class="card" onclick="window.showVisitDetails(${index})" style="padding:15px; margin-bottom:12px; background:#fff; border:1px solid var(--border-color); cursor:pointer; box-shadow:0 2px 4px rgba(0,0,0,0.05); transition:0.2s;">
                         <div class="d-flex justify-between align-center mb-10">
@@ -1280,7 +1281,8 @@
                 });
             } catch(e) { container.innerHTML = '<p class="text-danger">خطأ في التحميل.</p>'; console.error(e); }
         }
-        // دالة عرض التفاصيل الكاملة عند الضغط على الكارت
+
+        // دالة العرض داخل النافذة المنبثقة
         window.showVisitDetails = function(index) {
             const visit = window.patientVisitHistory[index];
             if(!visit) return;
@@ -1288,20 +1290,19 @@
             const content = document.getElementById('visitDetailsContent');
             const dateStr = visit.createdAt?.toDate ? visit.createdAt.toDate().toLocaleDateString('ar-EG') : 'غير محدد';
             
-            // تصميم احترافي لعرض التفاصيل داخل النافذة
             let html = `
                 <div style="background:#fff; padding:15px; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:15px;">
-                    <p style="margin:0 0 10px 0;"><strong>التاريخ:</strong> ${dateStr}</p>
+                    <p style="margin:0 0 10px 0;"><strong>التاريخ:</strong> <span dir="ltr">${dateStr}</span></p>
                     <p style="margin:0;"><strong>الشكوى الرئيسية:</strong> ${visit.chiefComplaint || '-'}</p>
                 </div>
 
                 <div style="background:#fff; padding:15px; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:15px;">
                     <h4 style="margin-top:0; color:var(--primary-color); border-bottom:2px solid #f1f5f9; padding-bottom:5px;">العلامات الحيوية والنمو</h4>
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                        <div><strong>الحرارة:</strong> ${visit.vitals?.temp || '-'} °C</div>
-                        <div><strong>الأكسجين:</strong> ${visit.vitals?.spo2 || '-'} %</div>
-                        <div><strong>الوزن:</strong> ${visit.growth?.weight || visit.vitals?.weight || '-'} Kg</div>
-                        <div><strong>الطول:</strong> ${visit.growth?.height || visit.vitals?.height || '-'} cm</div>
+                        <div><strong>الحرارة:</strong> <span dir="ltr">${visit.vitals?.temp || '-'} °C</span></div>
+                        <div><strong>الأكسجين:</strong> <span dir="ltr">${visit.vitals?.spo2 || '-'} %</span></div>
+                        <div><strong>الوزن:</strong> <span dir="ltr">${visit.growth?.weight || visit.vitals?.weight || '-'} Kg</span></div>
+                        <div><strong>الطول:</strong> <span dir="ltr">${visit.growth?.height || visit.vitals?.height || '-'} cm</span></div>
                     </div>
                 </div>
 
@@ -1319,6 +1320,30 @@
                     <p style="margin:5px 0;"><strong>ملاحظات إضافية:</strong> ${visit.diagnoses?.secondary || '-'}</p>
                 </div>
             `;
+
+            if (visit.medications && visit.medications.length > 0) {
+                html += `
+                <div style="background:#fff; padding:15px; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:15px;">
+                    <h4 style="margin-top:0; color:var(--primary-color); border-bottom:2px solid #f1f5f9; padding-bottom:5px;">الروشتة والعلاج</h4>
+                    <ul style="padding-right:20px; margin:0;">`;
+                visit.medications.forEach(med => {
+                    html += `<li style="margin-bottom:8px;"><strong>${med.name}</strong><br><small class="text-muted">الجرعة: <span dir="ltr">${med.dose}</span> | المدة: <span dir="ltr">${med.duration || '-'}</span> | تعليمات: ${med.notes || '-'}</small></li>`;
+                });
+                html += `</ul></div>`;
+            }
+
+            if (visit.treatmentPlan?.notes || visit.treatmentPlan?.followUpDate) {
+                html += `
+                <div style="background:#fff; padding:15px; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:15px;">
+                    <h4 style="margin-top:0; color:var(--primary-color); border-bottom:2px solid #f1f5f9; padding-bottom:5px;">خطة العلاج والمتابعة</h4>
+                    <p style="margin:5px 0;"><strong>التعليمات:</strong> ${visit.treatmentPlan?.notes || '-'}</p>
+                    <p style="margin:5px 0;"><strong>تاريخ المتابعة:</strong> <span dir="ltr">${visit.treatmentPlan?.followUpDate || '-'}</span></p>
+                </div>`;
+            }
+
+            content.innerHTML = html;
+            document.getElementById('visitDetailsModal').classList.add('active');
+        };
 
             // جلب الأدوية لو الروشتة كان فيها حاجة
             if (visit.medications && visit.medications.length > 0) {
