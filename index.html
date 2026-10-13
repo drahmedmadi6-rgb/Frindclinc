@@ -1078,22 +1078,21 @@
         }
 
         // ==========================================
-        // السجل المرضي للزيارات السابقة (نسخة مضادة للأخطاء)
+        // السجل المرضي للزيارات السابقة (النسخة الصحيحة والمنبثقة)
         // ==========================================
         window.patientVisitHistory = [];
 
         async function getPreviousVisits(patientId, excludeVisitId) {
-            // جلب كل زيارات المريض بدون فلاتر معقدة لتجنب أي أخطاء من الفايربيز
+            // شيلنا فلتر status من هنا عشان الفايربيز ميطلعش Error
             const q = query(collection(db, "visits"), where("patientId", "==", patientId));
             const snap = await getDocs(q); 
             let visits = [];
             snap.forEach(d => { 
                 const data = d.data();
-                if(d.id !== excludeVisitId) {
+                if(d.id !== excludeVisitId && data.status === "Completed") {
                     visits.push({ id: d.id, ...data }); 
                 }
             });
-            // الترتيب من الأحدث للأقدم
             return visits.sort((a,b) => {
                 let t1 = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : 0;
                 let t2 = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : 0;
@@ -1104,15 +1103,14 @@
         async function loadPreviousVisits() {
             const container = document.getElementById('previousVisitsContainer'); 
             if(!container) return;
-            
-            container.innerHTML = '<div style="padding:20px; text-align:center;"><p class="text-muted"><i class="fa-solid fa-spinner fa-spin"></i> جاري البحث عن الزيارات السابقة...</p></div>';
+            container.innerHTML = '<p class="text-muted"><i class="fa-solid fa-spinner fa-spin"></i> جاري تحميل السجل المرضي...</p>';
             
             try {
                 const visits = await getPreviousVisits(currentPatientId, currentVisitId);
                 window.patientVisitHistory = visits;
 
                 if(visits.length === 0) { 
-                    container.innerHTML = '<div style="background:#f8fafc; padding:20px; border-radius:8px; border:1px dashed #cbd5e1; text-align:center;"><i class="fa-solid fa-folder-open text-muted" style="font-size:2rem; margin-bottom:10px;"></i><p style="margin:0; color:var(--text-main);"><strong>لا توجد زيارات سابقة مسجلة لهذا الطفل</strong></p></div>'; 
+                    container.innerHTML = '<p class="text-muted" style="padding:15px; background:#f8fafc; border-radius:8px; border:1px dashed #cbd5e1;">لا توجد زيارات سابقة (معتمدة) لهذا الطفل.</p>'; 
                     return; 
                 }
                 
@@ -1120,29 +1118,100 @@
                 visits.forEach((v, index) => {
                     let dateStr = v.createdAt?.toDate ? v.createdAt.toDate().toLocaleDateString('ar-EG') : 'تاريخ غير مسجل';
                     let diag = (v.diagnoses && v.diagnoses.primary) ? v.diagnoses.primary : 'لم يسجل تشخيص';
-                    // تمييز الكشف المكتمل عن المسودة
-                    let statusBadge = v.status === 'Completed' ? '<span class="badge completed" style="background:#10b981; color:#fff;">مكتملة</span>' : '<span class="badge waiting" style="background:#f59e0b; color:#fff;">مسودة</span>';
                     
                     html += `
                     <div class="card" onclick="window.showVisitDetails(${index})" style="padding:15px; margin-bottom:12px; background:#fff; border:1px solid var(--border-color); cursor:pointer; box-shadow:0 2px 4px rgba(0,0,0,0.05); transition:all 0.2s;">
                         <div class="d-flex justify-between align-center mb-10">
                             <strong style="font-size:1.1rem;"><i class="fa-regular fa-calendar text-primary"></i> <span dir="ltr">${dateStr}</span></strong>
-                            ${statusBadge}
+                            <span class="badge" style="background:var(--primary-color); color:#fff;"><i class="fa-solid fa-up-right-from-square"></i> التفاصيل</span>
                         </div>
                         <p style="color:var(--primary-color); margin:5px 0;"><strong>التشخيص:</strong> ${diag}</p>
                         <p style="margin:0; font-size:0.95rem; color:var(--text-muted);"><strong>الشكوى:</strong> ${v.chiefComplaint || '-'}</p>
-                        <div style="margin-top:10px; text-align:left;">
-                            <span class="btn-small" style="background:#e0f2fe; color:#0369a1; border-radius:4px; padding:4px 8px; font-size:0.8rem;"><i class="fa-solid fa-up-right-from-square"></i> التفاصيل الكاملة</span>
-                        </div>
                     </div>`;
                 });
                 container.innerHTML = html;
             } catch(e) { 
-                // لو فيه خطأ، هيظهرلك في الشاشة عشان نعرفه بدل ما يسيبها بيضاء
-                container.innerHTML = `<div style="background:#fef2f2; border:1px solid #fca5a5; padding:15px; border-radius:8px; color:#991b1b;"><strong>خطأ في جلب البيانات:</strong> ${e.message}</div>`; 
+                container.innerHTML = `<div style="color:var(--danger-color); padding:10px;">خطأ في جلب البيانات: ${e.message}</div>`; 
                 console.error("Visit History Error:", e); 
             }
         }
+
+        window.showVisitDetails = function(index) {
+            const visit = window.patientVisitHistory[index];
+            if(!visit) return;
+
+            let modal = document.getElementById('visitDetailsModal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'visitDetailsModal';
+                modal.className = 'modal-overlay';
+                modal.innerHTML = `
+                    <div class="modal-content" style="max-width: 800px; max-height: 90vh; overflow-y: auto; background: #f8fafc;">
+                        <div class="d-flex justify-between align-center mb-20" style="border-bottom: 2px solid var(--primary-color); padding-bottom: 15px;">
+                            <h3 class="section-title text-primary" style="margin:0;"><i class="fa-solid fa-file-medical"></i> السجل الطبي للزيارة</h3>
+                            <button type="button" onclick="document.getElementById('visitDetailsModal').classList.remove('active')" class="btn-secondary btn-small" style="background:#e2e8f0;"><i class="fa-solid fa-times"></i> إغلاق</button>
+                        </div>
+                        <div id="visitDetailsContent" style="line-height: 1.8; color: var(--text-main);"></div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+            }
+
+            const content = document.getElementById('visitDetailsContent');
+            const dateStr = visit.createdAt?.toDate ? visit.createdAt.toDate().toLocaleDateString('ar-EG') : 'غير محدد';
+            
+            let html = `
+                <div style="background:#fff; padding:15px; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:15px;">
+                    <p style="margin:0 0 10px 0;"><strong>التاريخ:</strong> <span dir="ltr">${dateStr}</span></p>
+                    <p style="margin:0;"><strong>الشكوى الرئيسية:</strong> ${visit.chiefComplaint || '-'}</p>
+                </div>
+                <div style="background:#fff; padding:15px; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:15px;">
+                    <h4 style="margin-top:0; color:var(--primary-color); border-bottom:2px solid #f1f5f9; padding-bottom:5px;">العلامات الحيوية والنمو</h4>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                        <div><strong>الحرارة:</strong> <span dir="ltr">${visit.vitals?.temp || '-'} °C</span></div>
+                        <div><strong>الأكسجين:</strong> <span dir="ltr">${visit.vitals?.spo2 || '-'} %</span></div>
+                        <div><strong>الوزن:</strong> <span dir="ltr">${visit.growth?.weight || visit.vitals?.weight || '-'} Kg</span></div>
+                        <div><strong>الطول:</strong> <span dir="ltr">${visit.growth?.height || visit.vitals?.height || '-'} cm</span></div>
+                    </div>
+                </div>
+                <div style="background:#fff; padding:15px; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:15px;">
+                    <h4 style="margin-top:0; color:var(--primary-color); border-bottom:2px solid #f1f5f9; padding-bottom:5px;">الفحص السريري</h4>
+                    <p style="margin:5px 0;"><strong>عام (General):</strong> ${visit.examination?.general || '-'}</p>
+                    <p style="margin:5px 0;"><strong>الصدر (Chest):</strong> ${visit.examination?.resp || '-'}</p>
+                    <p style="margin:5px 0;"><strong>البطن (Abd):</strong> ${visit.examination?.abd || '-'}</p>
+                    <p style="margin:5px 0;"><strong>أخرى:</strong> ${visit.examination?.neuro || '-'}</p>
+                </div>
+                <div style="background:#fff; padding:15px; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:15px;">
+                    <h4 style="margin-top:0; color:var(--primary-color); border-bottom:2px solid #f1f5f9; padding-bottom:5px;">التشخيص</h4>
+                    <p style="margin:5px 0;"><strong>أساسي:</strong> ${visit.diagnoses?.primary || '-'}</p>
+                    <p style="margin:5px 0;"><strong>ملاحظات إضافية:</strong> ${visit.diagnoses?.secondary || '-'}</p>
+                </div>
+            `;
+
+            if (visit.medications && visit.medications.length > 0) {
+                html += `
+                <div style="background:#fff; padding:15px; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:15px;">
+                    <h4 style="margin-top:0; color:var(--primary-color); border-bottom:2px solid #f1f5f9; padding-bottom:5px;">الروشتة والعلاج</h4>
+                    <ul style="padding-right:20px; margin:0;">`;
+                visit.medications.forEach(med => {
+                    html += `<li style="margin-bottom:8px;"><strong>${med.name}</strong><br><small class="text-muted">الجرعة: <span dir="ltr">${med.dose}</span> | المدة: <span dir="ltr">${med.duration || '-'}</span> | تعليمات: ${med.notes || '-'}</small></li>`;
+                });
+                html += `</ul></div>`;
+            }
+
+            if (visit.treatmentPlan?.notes || visit.treatmentPlan?.followUpDate) {
+                html += `
+                <div style="background:#fff; padding:15px; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:15px;">
+                    <h4 style="margin-top:0; color:var(--primary-color); border-bottom:2px solid #f1f5f9; padding-bottom:5px;">خطة العلاج والمتابعة</h4>
+                    <p style="margin:5px 0;"><strong>التعليمات:</strong> ${visit.treatmentPlan?.notes || '-'}</p>
+                    <p style="margin:5px 0;"><strong>تاريخ المتابعة:</strong> <span dir="ltr">${visit.treatmentPlan?.followUpDate || '-'}</span></p>
+                </div>`;
+            }
+
+            content.innerHTML = html;
+            modal.classList.add('active');
+        };
+
 
         // بناء النافذة المنبثقة وعرض التفاصيل
         window.showVisitDetails = function(index) {
