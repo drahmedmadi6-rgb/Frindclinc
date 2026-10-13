@@ -1065,34 +1065,148 @@
         }
 
         // ==========================================
-        // التطعيمات (Vaccines)
+        // نظام التطعيمات الذكي المطور (Smart Vaccines Dashboard)
         // ==========================================
-        window.saveVaccineDose = async (patientId, vaccineId, doseNum, dateGiven, source = "Clinic") => {
-            if (!dateGiven) return showToast("الرجاء تحديد تاريخ الجرعة", "error");
-            try {
-                await addDoc(collection(db, "vaccination_records"), { patientId, vaccineId, doseNum: parseInt(doseNum), dateGiven, source, recordedAt: serverTimestamp() });
-                showToast("تم توثيق الجرعة بالسجل الدائم للطفل", "success");
-                await renderVaccinationDashboard(patientId, document.getElementById('phDOB').innerText);
-            } catch (e) { showToast("خطأ في توثيق الجرعة", "error"); }
+        window.batchVaccinesToSave = new Set(); // سلة لتجميع التطعيمات التي سيتم إعطاؤها اليوم
+
+        // دالة تحديد التطعيمات للإعطاء المجمع
+        window.toggleVaccineBatch = function(vaccineId) {
+            if (window.batchVaccinesToSave.has(vaccineId)) {
+                window.batchVaccinesToSave.delete(vaccineId);
+            } else {
+                window.batchVaccinesToSave.add(vaccineId);
+            }
+            const btn = document.getElementById('btnSaveBatchVaccines');
+            if(window.batchVaccinesToSave.size > 0) {
+                btn.style.display = 'flex';
+                btn.innerHTML = `<i class="fa-solid fa-syringe"></i> توثيق وإعطاء (${window.batchVaccinesToSave.size}) تطعيمات بتاريخ اليوم`;
+            } else {
+                btn.style.display = 'none';
+            }
         };
 
+        // دالة الحفظ المجمع بضغطة واحدة
+        window.saveBatchVaccines = async function(patientId) {
+            if(window.batchVaccinesToSave.size === 0) return;
+            showLoading("جاري توثيق التطعيمات في السجل الدائم...");
+            const dateGiven = getTodayStr();
+            const source = "Clinic";
+            try {
+                for (let vid of window.batchVaccinesToSave) {
+                    let doseNum = document.getElementById(`nextDose_${vid}`).value;
+                    await addDoc(collection(db, "vaccination_records"), {
+                        patientId, vaccineId: vid, doseNum: parseInt(doseNum), dateGiven, source, recordedAt: serverTimestamp()
+                    });
+                }
+                showToast("تم توثيق التطعيمات بنجاح", "success");
+                window.batchVaccinesToSave.clear();
+                await renderVaccinationDashboard(patientId, document.getElementById('phDOB').innerText);
+            } catch (e) {
+                showToast("خطأ في التوثيق", "error"); console.error(e);
+            }
+            hideLoading();
+        };
+
+        // دالة رسم واجهة التطعيمات الذكية
         async function renderVaccinationDashboard(patientId, dobStr) {
             const container = document.getElementById('vaccinesListContainer'); if (!container) return;
-            container.innerHTML = '<p class="text-muted"><i class="fa-solid fa-spinner fa-spin"></i> تقييم السجل التطعيمي...</p>';
+            container.innerHTML = '<div style="text-align:center; padding:30px;"><div class="spinner" style="margin:0 auto;"></div><p class="text-muted mt-10">تحليل السجل التطعيمي وبناء الخطة...</p></div>';
+            
             try {
+                window.batchVaccinesToSave.clear(); // تصفير السلة
                 const snap = await getDocs(query(collection(db, "vaccination_records"), where("patientId", "==", patientId)));
                 let history = []; snap.forEach(doc => history.push({ id: doc.id, ...doc.data() }));
                 history.sort((a, b) => new Date(a.dateGiven) - new Date(b.dateGiven));
                 
                 const report = vaccineEngine.generatePatientReport(dobStr, history);
-                container.innerHTML = '';
-                report.forEach(v => {
-                    let badge = v.status === 'Completed' ? '<span class="badge completed">مكتمل</span>' : (v.status === 'Due Now' ? '<span class="badge consultation" style="background:#fef08a;color:#854d0e">مستحق الآن</span>' : (v.status === 'Overdue' ? '<span class="badge waiting" style="background:#fee2e2;color:#991b1b">متأخر</span>' : `<span class="badge" style="background:#e0f2fe;color:#0369a1">${v.status}</span>`));
-                    let inputHtml = (v.status !== 'Completed' && !v.status.includes('Ineligible')) ? `<div class="mt-10 form-grid" style="align-items:center;"><input type="date" id="date_${v.vaccineId}" value="${getTodayStr()}"><button type="button" class="btn-primary btn-small" onclick="window.saveVaccineDose('${patientId}', '${v.vaccineId}', ${v.dosesGiven + 1}, document.getElementById('date_${v.vaccineId}').value)"><i class="fa-solid fa-syringe"></i> توثيق الجرعة ${v.dosesGiven + 1}</button></div>` : '';
-                    container.innerHTML += `<div class="card" style="margin-bottom:10px; padding:15px; border:1px solid var(--border-color); box-shadow:none;"><div class="d-flex justify-between align-center"><strong style="color:var(--primary-color);">${v.name}</strong> ${badge}</div><p style="margin:8px 0; color:var(--text-muted); font-size:0.9rem;"><strong>تقييم النظام:</strong> ${v.alert} <br><strong>الجرعات الموثقة:</strong> ${v.dosesGiven} من ${v.totalDoses}</p>${inputHtml}</div>`;
-                });
-            } catch (e) { container.innerHTML = '<p class="text-danger">خطأ في استدعاء السجل التطعيمي.</p>'; }
+                
+                // تصنيف التطعيمات هندسياً لراحة الطبيب
+                const overdue = report.filter(v => v.status === 'Overdue');
+                const dueNow = report.filter(v => v.status === 'Due Now');
+                const upcoming = report.filter(v => v.status !== 'Completed' && v.status !== 'Overdue' && v.status !== 'Due Now' && !v.status.includes('Ineligible'));
+                const completed = report.filter(v => v.status === 'Completed');
+                
+                // 1. الشريط الذكي (Smart Banner)
+                let bannerHtml = '';
+                if (overdue.length > 0) {
+                    bannerHtml = `<div style="background:#fef2f2; border:1px solid #f87171; color:#991b1b; padding:15px; border-radius:8px; margin-bottom:20px; font-size:0.95rem; font-weight:bold; display:flex; align-items:center; gap:10px;"><i class="fa-solid fa-triangle-exclamation" style="font-size:1.5rem;"></i> تحذير: الطفل متأخر عن ${overdue.length} تطعيمات هامة!</div>`;
+                } else if (dueNow.length > 0) {
+                    bannerHtml = `<div style="background:#fefce8; border:1px solid #facc15; color:#854d0e; padding:15px; border-radius:8px; margin-bottom:20px; font-size:0.95rem; font-weight:bold; display:flex; align-items:center; gap:10px;"><i class="fa-solid fa-bell" style="font-size:1.5rem;"></i> مستحق اليوم: يوجد ${dueNow.length} تطعيمات جاهزة للإعطاء.</div>`;
+                } else {
+                    bannerHtml = `<div style="background:#f0fdf4; border:1px solid #4ade80; color:#166534; padding:15px; border-radius:8px; margin-bottom:20px; font-size:0.95rem; font-weight:bold; display:flex; align-items:center; gap:10px;"><i class="fa-solid fa-shield-halved" style="font-size:1.5rem;"></i> ممتاز: الجدول التطعيمي منضبط ومكتمل حتى العمر الحالي.</div>`;
+                }
+
+                // 2. التطعيمات المستحقة الآن والمتأخرة (Action Required)
+                let actionHtml = '';
+                const actionable = [...overdue, ...dueNow];
+                if (actionable.length > 0) {
+                    actionHtml += `<h4 style="color:var(--danger-color); border-bottom:2px solid #fee2e2; padding-bottom:8px; margin-bottom:15px;"><i class="fa-solid fa-notes-medical"></i> تطعيمات يجب إعطاؤها الآن</h4>`;
+                    actionHtml += `<div style="display:grid; gap:12px; margin-bottom:20px;">`;
+                    actionable.forEach(v => {
+                        let isOverdue = v.status === 'Overdue';
+                        let badge = isOverdue ? '<span class="badge waiting" style="background:#fee2e2;color:#991b1b;font-size:0.75rem;">متأخرة</span>' : '<span class="badge consultation" style="background:#fef08a;color:#854d0e;font-size:0.75rem;">مستحقة</span>';
+                        let nextDose = v.dosesGiven + 1;
+                        
+                        // تصميم كارت تفاعلي بضغطة واحدة
+                        actionHtml += `
+                        <label style="display:flex; align-items:flex-start; padding:15px; background:#fff; border:2px solid ${isOverdue ? '#fca5a5' : 'var(--border-color)'}; border-radius:10px; cursor:pointer; transition:all 0.2s; box-shadow:0 2px 5px rgba(0,0,0,0.02);">
+                            <input type="checkbox" style="width:22px; height:22px; margin-left:15px; margin-top:2px; accent-color:var(--primary-color);" onchange="window.toggleVaccineBatch('${v.vaccineId}')">
+                            <input type="hidden" id="nextDose_${v.vaccineId}" value="${nextDose}">
+                            <div style="flex:1;">
+                                <div class="d-flex justify-between align-center mb-10"><strong style="color:var(--text-main); font-size:1.05rem;">${v.name}</strong> ${badge}</div>
+                                <p style="margin:0; color:var(--text-muted); font-size:0.85rem;">الجرعة رقم ${nextDose} من ${v.totalDoses} | ${v.alert}</p>
+                            </div>
+                        </label>`;
+                    });
+                    actionHtml += `</div>`;
+                    // زر التوثيق المجمع
+                    actionHtml += `<button type="button" id="btnSaveBatchVaccines" onclick="window.saveBatchVaccines('${patientId}')" class="btn-primary" style="width:100%; display:none; margin-bottom:30px; padding:15px; font-size:1.1rem; box-shadow: 0 4px 10px rgba(15, 118, 110, 0.3);"></button>`;
+                }
+
+                // 3. المواعيد القادمة (Upcoming)
+                let upcomingHtml = '';
+                if(upcoming.length > 0) {
+                    upcomingHtml += `<h4 style="color:var(--primary-color); border-bottom:2px solid #e0f2fe; padding-bottom:8px; margin-bottom:15px;"><i class="fa-regular fa-calendar-clock"></i> الجرعات المستقبلية</h4>`;
+                    upcomingHtml += `<div style="display:grid; gap:10px; margin-bottom:25px;">`;
+                    upcoming.forEach(v => {
+                        upcomingHtml += `
+                        <div style="padding:12px 15px; background:#f8fafc; border:1px solid var(--border-color); border-radius:8px;">
+                            <div class="d-flex justify-between align-center"><strong style="color:var(--text-main);">${v.name}</strong> <span class="badge" style="background:#e0f2fe;color:#0369a1;font-size:0.75rem;">موعد قادم</span></div>
+                            <p style="margin:5px 0 0 0; color:var(--text-muted); font-size:0.85rem;">الجرعة رقم ${v.dosesGiven + 1} | ${v.alert}</p>
+                        </div>`;
+                    });
+                    upcomingHtml += `</div>`;
+                }
+
+                // 4. التطعيمات المكتملة (مطوية لتوفير المساحة)
+                let completedHtml = '';
+                if(completed.length > 0) {
+                    completedHtml += `
+                    <details style="background:#fff; border:1px solid var(--border-color); border-radius:10px; overflow:hidden;">
+                        <summary style="padding:15px; font-weight:bold; cursor:pointer; background:#f1f5f9; color:var(--text-muted); outline:none; user-select:none;">
+                            <i class="fa-solid fa-check-circle" style="color:#10b981;"></i> عرض التطعيمات المكتملة (${completed.length})
+                        </summary>
+                        <div style="padding:15px; display:grid; gap:10px; border-top:1px solid var(--border-color);">
+                    `;
+                    completed.forEach(v => {
+                        completedHtml += `
+                        <div class="d-flex justify-between align-center" style="padding:12px; background:#f8fafc; border-radius:8px; border:1px dashed #cbd5e1;">
+                            <strong style="color:var(--text-main); font-size:0.95rem;">${v.name}</strong>
+                            <span style="color:#10b981; font-weight:bold; font-size:0.85rem;"><i class="fa-solid fa-check"></i> مكتمل (${v.totalDoses}/${v.totalDoses})</span>
+                        </div>`;
+                    });
+                    completedHtml += `</div></details>`;
+                }
+
+                // دمج وعرض كل الأقسام
+                container.innerHTML = bannerHtml + actionHtml + upcomingHtml + completedHtml;
+
+            } catch (e) { 
+                container.innerHTML = '<p class="text-danger">خطأ في استدعاء السجل التطعيمي.</p>'; 
+                console.error("Vaccine Render Error:", e);
+            }
         }
+
 
         // ==========================================
         // التحاليل والمرفقات والزيارات السابقة
