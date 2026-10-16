@@ -1769,6 +1769,333 @@
                 ul.appendChild(li);
             });
         }
+
+        // ==========================================
+        // 11. منظومة الكشف الذكي باللمس (Smart 1-Tap Mobile EMR)
+        // ==========================================
+        function initSmartOneTapEMR() {
+            // 1. حقن تنسيقات الأزرار الذكية والكبسولات
+            const style = document.createElement('style');
+            style.innerHTML = `
+                .smart-chips-bar { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+                .smart-chip { background: #f1f5f9; color: #0f172a; border: 1px solid #cbd5e1; border-radius: 20px; padding: 6px 12px; font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: all 0.15s; user-select: none; display: inline-flex; align-items: center; gap: 5px; }
+                .smart-chip:active, .smart-chip:hover { background: var(--primary-color); color: #fff; border-color: var(--primary-color); transform: scale(0.96); }
+                .smart-chip.abnormal { background: #fef2f2; color: #991b1b; border-color: #fca5a5; }
+                .smart-chip.abnormal:active, .smart-chip.abnormal:hover { background: #ef4444; color: #fff; }
+                .bundles-bar { display: flex; gap: 8px; overflow-x: auto; padding: 10px 0 4px 0; -webkit-overflow-scrolling: touch; }
+                .bundle-btn { background: #fff; color: var(--primary-color); border: 1.5px solid var(--primary-color); border-radius: 10px; padding: 8px 14px; font-size: 0.85rem; font-weight: 800; white-space: nowrap; flex-shrink: 0; box-shadow: 0 2px 4px rgba(15,118,110,0.08); }
+                .bundle-btn:active, .bundle-btn:hover { background: var(--primary-color); color: #fff; }
+                .mic-btn { background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; border-radius: 8px; padding: 6px 12px; font-size: 0.82rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; }
+                .mic-btn.listening { background: #dc2626; color: #fff; animation: pulseMic 1s infinite; }
+                @keyframes pulseMic { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+                .dose-calc-banner { background: #eff6ff; border: 1px solid #93c5fd; color: #1e3a8a; border-radius: 8px; padding: 10px 12px; margin-top: 8px; font-size: 0.88rem; display: none; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+            `;
+            document.head.appendChild(style);
+
+            // 2. إضافة شريط البروتوكولات السريعة (1-Click Clinical Bundles) أعلى الكشف
+            const summaryBanner = document.querySelector('.clinical-summary-banner');
+            if (summaryBanner) {
+                const bundlesDiv = document.createElement('div');
+                bundlesDiv.style.marginTop = '12px';
+                bundlesDiv.style.paddingTop = '10px';
+                bundlesDiv.style.borderTop = '1px dashed #cbd5e1';
+                bundlesDiv.innerHTML = `
+                    <div class="d-flex justify-between align-center">
+                        <small style="font-weight:800; color:var(--primary-color);"><i class="fa-solid fa-wand-magic-sparkles"></i> بروتوكولات الكشف السريع (ضغطة واحدة):</small>
+                        <small id="autoSaveIndicator" style="color:var(--success-color); font-weight:bold; font-size:0.75rem;"></small>
+                    </div>
+                    <div class="bundles-bar">
+                        <button type="button" class="bundle-btn" onclick="window.applyClinicalBundle('GE')"><i class="fa-solid fa-droplet"></i> نزلة معوية (GE)</button>
+                        <button type="button" class="bundle-btn" onclick="window.applyClinicalBundle('TONSIL')"><i class="fa-solid fa-bacteria"></i> التهاب لوز وحلق</button>
+                        <button type="button" class="bundle-btn" onclick="window.applyClinicalBundle('CHEST')"><i class="fa-solid fa-lungs"></i> حساسية صدر / شعبية</button>
+                        <button type="button" class="bundle-btn" onclick="window.applyClinicalBundle('COLD')"><i class="fa-solid fa-snowflake"></i> نزلة برد ورشح</button>
+                        <button type="button" class="bundle-btn" onclick="window.applyClinicalBundle('NEONATE')"><i class="fa-solid fa-baby"></i> متابعة حديثي الولادة</button>
+                    </div>
+                `;
+                summaryBanner.appendChild(bundlesDiv);
+            }
+
+            // 3. كبسولات الشكوى السريعة + الإملاء الصوتي
+            const complaintEl = document.getElementById('visitComplaint');
+            if (complaintEl) {
+                const labelRow = complaintEl.previousElementSibling;
+                if (labelRow) {
+                    labelRow.classList.add('d-flex', 'justify-between', 'align-center');
+                    labelRow.innerHTML += `<button type="button" class="mic-btn" onclick="window.toggleVoiceInput('visitComplaint', this)"><i class="fa-solid fa-microphone"></i> إملاء صوتي</button>`;
+                }
+                const chips = ['حرارة مرتفعة', 'كحة', 'رشح وزكام', 'قيء متكرر', 'إسهال', 'مغص وغازات', 'ضيق تنفس', 'ضعف رضاعة', 'صفراء بالجلد', 'متابعة نمو وتطعيم'];
+                const bar = document.createElement('div');
+                bar.className = 'smart-chips-bar';
+                chips.forEach(c => {
+                    bar.innerHTML += `<span class="smart-chip" onclick="window.appendTextChip('visitComplaint', '${c}', ' ، ')">+ ${c}</span>`;
+                });
+                complaintEl.insertAdjacentElement('afterend', bar);
+            }
+
+            // 4. زر "فحص طبيعي كامل" + كبسولات الفحص السريري
+            const examGenEl = document.getElementById('examGeneral');
+            if (examGenEl) {
+                const normalBtnBar = document.createElement('div');
+                normalBtnBar.className = 'd-flex justify-between align-center mb-10';
+                normalBtnBar.style.flexWrap = 'wrap';
+                normalBtnBar.style.gap = '8px';
+                normalBtnBar.innerHTML = `
+                    <button type="button" class="btn-primary btn-small" style="background:#0284c7; width:100%;" onclick="window.fillNormalExam()">
+                        <i class="fa-solid fa-bolt"></i> ملء فحص طبيعي بالكامل بضغطة واحدة (Normal Exam)
+                    </button>
+                    <div class="smart-chips-bar" style="width:100%; margin-top:4px;">
+                        <span class="smart-chip abnormal" onclick="window.setExamChip('examResp', 'Bilateral harsh vesicular breath sounds with wheezes')">صدر: Wheezes</span>
+                        <span class="smart-chip abnormal" onclick="window.setExamChip('examResp', 'Bilateral crepitations, tachypnea')">صدر: Crepitations</span>
+                        <span class="smart-chip abnormal" onclick="window.setExamChip('examNeuro', 'Severe congested throat, enlarged tonsils with exudate')">حلق: Follicular Tonsillitis</span>
+                        <span class="smart-chip abnormal" onclick="window.setExamChip('examNeuro', 'Congested tympanic membrane (Otitis Media)')">أذن: Otitis Media</span>
+                        <span class="smart-chip abnormal" onclick="window.setExamChip('examGeneral', 'Conscious, mild dehydration, sunken eyes')">عام: Mild Dehydration</span>
+                        <span class="smart-chip abnormal" onclick="window.setExamChip('examAbd', 'Distended abdomen, hyperactive bowel sounds, colicky')">بطن: Distended/Colicky</span>
+                    </div>
+                `;
+                examGenEl.parentElement.insertAdjacentElement('beforebegin', normalBtnBar);
+            }
+
+            // 5. حاسبة الجرعات بالوزن + كبسولات الروشتة السريعة
+            const medNameEl = document.getElementById('medName');
+            const medDoseEl = document.getElementById('medDose');
+            const medDurEl = document.getElementById('medDuration');
+            const medNotesEl = document.getElementById('medNotes');
+
+            if (medNameEl) {
+                const hintBox = document.createElement('div');
+                hintBox.id = 'smartDoseHint';
+                hintBox.className = 'dose-calc-banner';
+                medNameEl.parentElement.insertAdjacentElement('afterend', hintBox);
+
+                medNameEl.addEventListener('input', window.calculateWeightDoseHint);
+                medNameEl.addEventListener('blur', () => setTimeout(window.calculateWeightDoseHint, 250));
+                document.getElementById('vWeight')?.addEventListener('input', window.calculateWeightDoseHint);
+            }
+
+            if (medDoseEl) {
+                const doseChips = ['2.5 سم', '3.5 سم', '5 سم', '7.5 سم', '10 سم', '5 نقط بالفم', '10 نقط بالفم', 'لبوسة شرجية', 'بخاخ بالأنف', 'جلسة استنشاق'];
+                const bar = document.createElement('div');
+                bar.className = 'smart-chips-bar';
+                doseChips.forEach(c => {
+                    bar.innerHTML += `<span class="smart-chip" onclick="document.getElementById('medDose').value='${c}'">${c}</span>`;
+                });
+                medDoseEl.insertAdjacentElement('afterend', bar);
+            }
+
+            if (medDurEl) {
+                const durChips = ['كل 8 ساعات - 5 أيام', 'كل 12 ساعة - 5 أيام', 'كل 24 ساعة - 3 أيام', 'كل 6 ساعات عند اللزوم', '3 مرات يومياً - 5 أيام', 'مرة يومياً لمدة شهر'];
+                const bar = document.createElement('div');
+                bar.className = 'smart-chips-bar';
+                durChips.forEach(c => {
+                    bar.innerHTML += `<span class="smart-chip" onclick="document.getElementById('medDuration').value='${c}'">${c}</span>`;
+                });
+                medDurEl.insertAdjacentElement('afterend', bar);
+            }
+
+            if (medNotesEl) {
+                const noteChips = ['بعد الأكل', 'قبل الرضاعة بـ 15 دقيقة', 'عند اللزوم للحرارة فوق 38.5', 'ترج الزجاجة جيداً قبل الاستخدام', 'يحفظ بالثلاجة بعد الحل'];
+                const bar = document.createElement('div');
+                bar.className = 'smart-chips-bar';
+                noteChips.forEach(c => {
+                    bar.innerHTML += `<span class="smart-chip" onclick="window.appendTextChip('medNotes', '${c}', ' - ')">+ ${c}</span>`;
+                });
+                medNotesEl.insertAdjacentElement('afterend', bar);
+            }
+
+            // 6. إملاء صوتي وكبسولات سريعة لتعليمات الأسرة في الخطة
+            const planNotesEl = document.getElementById('planNotes');
+            if (planNotesEl) {
+                const lbl = planNotesEl.previousElementSibling;
+                if (lbl) {
+                    lbl.classList.add('d-flex', 'justify-between', 'align-center');
+                    lbl.innerHTML += `<button type="button" class="mic-btn" onclick="window.toggleVoiceInput('planNotes', this)"><i class="fa-solid fa-microphone"></i> إملاء صوتي</button>`;
+                }
+                const planChips = ['الإكثار من السوائل الدافئة ومحلول الجفاف', 'كمادات مياه فاترة تحت الإبط وعلى الرقبة', 'غسيل الأنف بمحلول الملح قبل الرضاعة والنوم', 'ممنوع الألبان ومنتجاتها والمقليات مؤقتاً', 'التوجه للطوارئ فوراً حال استمرار القيء أو الخمول'];
+                const bar = document.createElement('div');
+                bar.className = 'smart-chips-bar';
+                planChips.forEach(c => {
+                    bar.innerHTML += `<span class="smart-chip" onclick="window.appendTextChip('planNotes', '${c}', ' | ')">+ ${c}</span>`;
+                });
+                planNotesEl.insertAdjacentElement('afterend', bar);
+            }
+
+            // 7. الحفظ التلقائي اللحظي في ذاكرة الموبايل (Local Auto-Save)
+            document.getElementById('visitForm')?.addEventListener('input', debounce(() => {
+                if (!currentVisitId) return;
+                try {
+                    const data = buildVisitDataObject();
+                    localStorage.setItem(`neokids_autosave_${currentVisitId}`, JSON.stringify(data));
+                    const ind = document.getElementById('autoSaveIndicator');
+                    if (ind) {
+                        ind.innerHTML = `<i class="fa-solid fa-cloud-check"></i> محفوظ تلقائياً بالهاتف`;
+                        setTimeout(() => { if(ind) ind.innerHTML = ''; }, 2500);
+                    }
+                } catch(e) {}
+            }, 600));
+        }
+
+        // دالة إضافة نص الكبسولة للخانة بلمسة واحدة
+        window.appendTextChip = function(inputId, text, sep = ' ، ') {
+            const el = document.getElementById(inputId);
+            if (!el) return;
+            const current = el.value.trim();
+            if (!current) el.value = text;
+            else if (!current.includes(text)) el.value = current + sep + text;
+            el.dispatchEvent(new Event('input', { bubbles: true }));
+        };
+
+        // دالة ملء الفحص الطبيعي بضغطة واحدة
+        window.fillNormalExam = function() {
+            document.getElementById('examGeneral').value = 'Conscious, alert, active, well hydrated, no pallor, cyanosis or jaundice';
+            document.getElementById('examResp').value = 'Good bilateral air entry, vesicular breath sounds, no wheezes or crepitations';
+            document.getElementById('examCVS').value = 'Normal S1 & S2, regular rhythm, no murmurs, intact peripheral perfusion';
+            document.getElementById('examAbd').value = 'Soft, lax, painless, no organomegaly, normal bowel sounds';
+            document.getElementById('examNeuro').value = 'Normal tone & activity, ENT free, skin clear';
+            showToast("تم ملء الفحص الطبيعي بالكامل ⚡");
+        };
+
+        window.setExamChip = function(inputId, text) {
+            const el = document.getElementById(inputId);
+            if (el) { el.value = text; showToast("تم تحديث خانة الفحص"); }
+        };
+
+        // حاسبة الجرعات الذكية حسب وزن الطفل
+        window.calculateWeightDoseHint = function() {
+            const hintBox = document.getElementById('smartDoseHint');
+            const medVal = (document.getElementById('medName')?.value || '').toLowerCase();
+            const weight = parseFloat(document.getElementById('vWeight')?.value || document.getElementById('gWeight')?.value || 0);
+            if (!hintBox || !medVal || weight <= 0) {
+                if (hintBox) hintBox.style.display = 'none';
+                return;
+            }
+
+            let suggestion = null;
+            let doseTextToApply = '';
+
+            if (medVal.includes('cetal') || medVal.includes('paramol') || medVal.includes('paracetamol') || medVal.includes('abimol') || medVal.includes('tempra') || medVal.includes('perfalgan')) {
+                const mg = Math.round(weight * 15);
+                const ml120 = ((mg * 5) / 120).toFixed(1);
+                const ml250 = ((mg * 5) / 250).toFixed(1);
+                suggestion = `باراسيتامول (15 مجم/كجم = ${mg} مجم): شراب 120 (${ml120} سم) أو شراب 250 (${ml250} سم) كل 6-8 ساعات`;
+                doseTextToApply = `${ml120} سم`;
+            } else if (medVal.includes('brufen') || medVal.includes('ibuprofen') || medVal.includes('marcofen') || medVal.includes('contafever')) {
+                const mg = Math.round(weight * 10);
+                const ml100 = ((mg * 5) / 100).toFixed(1);
+                suggestion = `إيبوبروفين (10 مجم/كجم = ${mg} مجم): شراب 100mg/5ml ⬅️ (${ml100} سم) كل 8 ساعات بعد الأكل`;
+                doseTextToApply = `${ml100} سم`;
+            } else if (medVal.includes('zithromax') || medVal.includes('azithro') || medVal.includes('ziscap') || medVal.includes('xithrone')) {
+                const mg = Math.round(weight * 10);
+                const ml200 = ((mg * 5) / 200).toFixed(1);
+                suggestion = `أزيثروميسين (10 مجم/كجم/يوم = ${mg} مجم): معلق 200mg/5ml ⬅️ (${ml200} سم) مرة يومياً لمدة 3-5 أيام`;
+                doseTextToApply = `${ml200} سم`;
+            } else if (medVal.includes('augmentin') || medVal.includes('curam') || medVal.includes('hibiotic') || medVal.includes('amox') || medVal.includes('emox')) {
+                const totalDayMg = Math.round(weight * 50);
+                const ml457PerDose = (((totalDayMg / 2) * 5) / 400).toFixed(1);
+                suggestion = `أموكسيسيلين/كلافولانيك (50 مجم/كجم/يوم): تركيز 457 ⬅️ (${ml457PerDose} سم) كل 12 ساعة`;
+                doseTextToApply = `${ml457PerDose} سم`;
+            } else if (medVal.includes('suprax') || medVal.includes('cefix') || medVal.includes('ximacef')) {
+                const mgDay = Math.round(weight * 8);
+                const ml100 = ((mgDay * 5) / 100).toFixed(1);
+                suggestion = `سيفيكسيم (8 مجم/كجم/يوم = ${mgDay} مجم): معلق 100mg/5ml ⬅️ (${ml100} سم) يومياً أو مقسمة كل 12 ساعة`;
+                doseTextToApply = `${ml100} سم`;
+            }
+
+            if (suggestion) {
+                hintBox.style.display = 'flex';
+                hintBox.innerHTML = `
+                    <span><i class="fa-solid fa-calculator"></i> <strong>حاسبة الوزن (${weight} كجم):</strong> ${suggestion}</span>
+                    <button type="button" class="btn-primary btn-small" style="padding:4px 10px; font-size:0.78rem;" onclick="document.getElementById('medDose').value='${doseTextToApply}'">تطبيق الجرعة</button>
+                `;
+            } else {
+                hintBox.style.display = 'none';
+            }
+        };
+
+        // تطبيق بروتوكول علاجي كامل بضغطة واحدة
+        window.applyClinicalBundle = function(type) {
+            const weight = parseFloat(document.getElementById('vWeight')?.value || 10);
+            const paraMl = (((weight * 15) * 5) / 120).toFixed(1);
+
+            if (type === 'GE') {
+                window.appendTextChip('visitComplaint', 'قيء وإسهال متكرر (Acute Gastroenteritis)');
+                document.getElementById('diagPrimary').value = 'A09 - Infectious gastroenteritis and colitis, unspecified';
+                currentMedications.push(
+                    { name: 'Ondansetron / Danset Syrup', dose: weight <= 10 ? '2 سم' : '4 سم', duration: 'قبل الرضاعة/الأكل عند اللزوم للقيء', notes: 'يوقف حال توقف القيء' },
+                    { name: 'ORS (محلول معالجة الجفاف)', dose: '50 سم بعد كل إسهال أو قيء', duration: 'لمدة 3 أيام', notes: 'يرشف ببطء بالملعقة أو السرنجة' },
+                    { name: 'Zinc Origin / Sulzinc Syrup', dose: weight < 10 ? '2.5 سم' : '5 سم', duration: 'مرة يومياً - 10 أيام', notes: 'لتجديد جدار الأمعاء' }
+                );
+                document.getElementById('planNotes').value = 'الإكثار من السوائل ومحلول الجفاف تدريجياً | تغذية خفيفة (تفاح، جزر، أرز، بطاطس مسلوقة، زبادي) | التوجه للطوارئ حال استمرار القيء أو الخمول.';
+            } else if (type === 'TONSIL') {
+                window.appendTextChip('visitComplaint', 'حرارة مرتفعة وصعوبة بالبلع (Acute Tonsillitis)');
+                document.getElementById('diagPrimary').value = 'J03.90 - Acute tonsillitis, unspecified';
+                const amoxMl = ((((weight * 50) / 2) * 5) / 400).toFixed(1);
+                currentMedications.push(
+                    { name: 'Augmentin / Curam 457 mg/5ml Susp', dose: `${amoxMl} سم`, duration: 'كل 12 ساعة - 7 أيام', notes: 'ترج الزجاجة جيداً وتحفظ بالثلاجة' },
+                    { name: 'Cetal / Paramol 120mg/5ml Syrup', dose: `${paraMl} سم`, duration: 'كل 6 ساعات عند اللزوم للحرارة', notes: 'مع كمادات فاترة' }
+                );
+                document.getElementById('planNotes').value = 'سوائل دافئة وعصائر طبيعية | كمادات مياه فاترة عند ارتفاع الحرارة | إكمال كورس المضاد الحيوي بالكامل.';
+            } else if (type === 'CHEST') {
+                window.appendTextChip('visitComplaint', 'كحة وضيق بالتنفس وتزييق بالصدر');
+                document.getElementById('diagPrimary').value = 'J21.9 - Acute bronchiolitis, unspecified';
+                currentMedications.push(
+                    { name: 'Farcolin / Ventolin Nebulizer Session', dose: '0.5 سم + 3 سم محلول ملح', duration: 'جلسة كل 8 ساعات - 3 أيام', notes: 'استنشاق بالجهاز' },
+                    { name: 'Pulmicort 0.25mg Respules', dose: 'أمبول + 2 سم محلول ملح', duration: 'جلسة كل 12 ساعة - 5 أيام', notes: 'يغسل الوجه والفم بعد الجلسة' }
+                );
+                document.getElementById('planNotes').value = 'غسيل الأنف بمحلول الملح باستمرار | تجنب الأتربة والدخان والروائح النفاذة | متابعة سرعة التنفس.';
+            } else if (type === 'COLD') {
+                window.appendTextChip('visitComplaint', 'رشح وكحة بسيطة وحرارة خفيفة');
+                document.getElementById('diagPrimary').value = 'J00 - Acute nasopharyngitis [common cold]';
+                currentMedications.push(
+                    { name: 'Otrivin Baby Saline / Lyse Nasal Drops', dose: 'بخاخ/نقطتين بكل فتحة أنف', duration: 'كل 6 ساعات وقبل الرضاعة والنوم', notes: 'تنظيف وتشفيط الأنف' },
+                    { name: 'Cetal / Paramol Syrup', dose: `${paraMl} سم`, duration: 'كل 6-8 ساعات عند اللزوم', notes: 'عند ارتفاع الحرارة' }
+                );
+                document.getElementById('planNotes').value = 'غسيل الأنف بمحلول الملح | سوائل دافئة | لا داعي للمضاد الحيوي في العدوى الفيروسية البسيطة.';
+            } else if (type === 'NEONATE') {
+                window.appendTextChip('visitComplaint', 'فحص ومتابعة حديثي الولادة (Safe Start Follow-up)');
+                document.getElementById('diagPrimary').value = 'Z00.110 - Health examination for newborn under 8 days old';
+                currentMedications.push(
+                    { name: 'Vidrop / Vi-De3 Oral Drops', dose: '4 نقط بالفم', duration: 'مرة يومياً صباحاً', notes: 'فيتامين د اليومي' },
+                    { name: 'Tobrex Eye Drops', dose: 'نقطة بكل عين', duration: '3 مرات يومياً - 5 أيام', notes: 'مع مسح العين من الداخل للخارج' },
+                    { name: 'Alcohol 70% Umbilical Care', dose: 'دهان للسرة', duration: 'مع كل غيار حفاض', notes: 'حتى سقوط السرة وجفافها' }
+                );
+                document.getElementById('planNotes').value = 'رضاعة طبيعية منتظمة كل ساعتين إلى 3 ساعات | التكريع بعد كل رضعة | متابعة لون الجلد والصفراء والوزن.';
+            }
+
+            renderMedicationsTable();
+            showToast("تم تطبيق البروتوكول السريع بنجاح ✨");
+        };
+
+        // الإملاء الصوتي المباشر باللهجة المصرية (Web Speech API)
+        window.toggleVoiceInput = function(targetId, btnEl) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                return showToast("متصفحك الحالي لا يدعم الإملاء الصوتي المباشر", "error");
+            }
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'ar-EG';
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+
+            btnEl.classList.add('listening');
+            btnEl.innerHTML = `<i class="fa-solid fa-circle-dot"></i> تحدث الآن...`;
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                window.appendTextChip(targetId, transcript, ' ، ');
+                showToast("تم تسجيل النص صوتياً 🎤");
+            };
+            recognition.onerror = () => {
+                showToast("لم يتم التقاط الصوت، حاول مرة أخرى", "error");
+            };
+            recognition.onend = () => {
+                btnEl.classList.remove('listening');
+                btnEl.innerHTML = `<i class="fa-solid fa-microphone"></i> إملاء صوتي`;
+            };
+            recognition.start();
+        };
+
+        // تفعيل المنظومة الذكية فور جاهزية الصفحة
+        initSmartOneTapEMR();
     </script>
 </body>
 </html>
