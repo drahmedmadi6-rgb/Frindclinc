@@ -223,44 +223,6 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); padding: 13px 24px; color: white; border-radius: 8px; z-index: 10000; font-weight: bold; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2); transition: opacity 0.3s; }
         .d-flex { display: flex; } .justify-between { justify-content: space-between; } .align-center { align-items: center; } .gap-10 { gap: 10px; }
-
-        /* =========================================
-           إضافات الذكاء والسرعة للموبايل (Zero-Typing & Interactive Charts)
-           ========================================= */
-        .quick-chips-bar { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 8px; }
-        .q-chip {
-            background: #f1f5f9; color: var(--text-main); border: 1px solid #cbd5e1;
-            border-radius: 20px; padding: 6px 12px; font-size: 0.82rem; font-weight: 700;
-            cursor: pointer; transition: all 0.15s ease; user-select: none; display: inline-flex; align-items: center; gap: 5px;
-        }
-        .q-chip:hover, .q-chip:active { background: var(--primary-color); color: #fff; border-color: var(--primary-color); transform: scale(0.96); }
-        .q-chip.bundle-chip { background: #fff; border: 1.5px solid var(--primary-color); color: var(--primary-color); padding: 8px 14px; font-size: 0.86rem; box-shadow: 0 2px 4px rgba(15,118,110,0.08); }
-        .q-chip.bundle-chip:active { background: var(--primary-color); color: #fff; }
-
-        .voice-btn {
-            background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5;
-            padding: 6px 12px; border-radius: 20px; font-size: 0.82rem; font-weight: 700; cursor: pointer;
-        }
-        .voice-btn.listening { background: #ef4444; color: #fff; animation: pulseMic 1s infinite; }
-        @keyframes pulseMic { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
-
-        .dose-calc-banner {
-            background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px;
-            padding: 12px 14px; margin-bottom: 14px; font-size: 0.86rem; color: #1e3a8a;
-        }
-        .dose-calc-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
-        .dose-pill {
-            background: #fff; border: 1px solid #93c5fd; border-radius: 8px;
-            padding: 6px 10px; cursor: pointer; font-weight: 700; font-size: 0.8rem; color: #1d4ed8; transition: 0.15s;
-        }
-        .dose-pill:active { background: #1d4ed8; color: #fff; }
-
-        .chart-tabs-bar { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 12px; }
-        .chart-tab-btn {
-            flex: 1; min-width: 120px; padding: 10px 12px; border-radius: 8px; border: 1.5px solid var(--border-color);
-            background: #f8fafc; color: var(--text-muted); font-weight: 700; font-size: 0.86rem; cursor: pointer; white-space: nowrap;
-        }
-        .chart-tab-btn.active { background: var(--primary-color); color: #fff; border-color: var(--primary-color); box-shadow: 0 3px 8px rgba(15,118,110,0.2); }
     </style>
 </head>
 <body>
@@ -416,21 +378,6 @@
                         </div>
                     </div>
 
-                    <!-- شريط بروتوكولات د. أحمد السريعة (1-Tap Clinical Bundles) -->
-                    <div class="card" style="padding: 12px 16px; margin-bottom: 16px; background: #fff; border: 1.5px dashed var(--primary-color);">
-                        <div class="d-flex justify-between align-center" style="margin-bottom: 6px;">
-                            <strong style="font-size: 0.9rem; color: var(--primary-color);"><i class="fa-solid fa-wand-magic-sparkles"></i> بروتوكولات الكشف السريع بلمسة واحدة:</strong>
-                            <small id="autoSaveIndicator" class="text-muted" style="font-size: 0.75rem;"><i class="fa-solid fa-shield-check"></i> حفظ لحظي نشط</small>
-                        </div>
-                        <div class="quick-chips-bar" style="overflow-x: auto; flex-wrap: nowrap; padding-bottom: 4px;">
-                            <span class="q-chip bundle-chip" onclick="window.applyClinicalBundle('GE')"><i class="fa-solid fa-viruses"></i> نزلة معوية حادة</span>
-                            <span class="q-chip bundle-chip" onclick="window.applyClinicalBundle('TONSILS')"><i class="fa-solid fa-head-side-cough"></i> التهاب لوزتين وحلق</span>
-                            <span class="q-chip bundle-chip" onclick="window.applyClinicalBundle('CHEST')"><i class="fa-solid fa-lungs"></i> حساسية صدر / نزلة شعبية</span>
-                            <span class="q-chip bundle-chip" onclick="window.applyClinicalBundle('COLD')"><i class="fa-solid fa-snowflake"></i> نزلة برد ورشح</span>
-                            <span class="q-chip bundle-chip" onclick="window.applyClinicalBundle('NEONATE')"><i class="fa-solid fa-baby"></i> متابعة حديثي الولادة</span>
-                        </div>
-                    </div>
-
                     <form id="visitForm">
                         
                         <!-- الأكورديون 1: الشكوى والعلامات الحيوية -->
@@ -441,29 +388,43 @@
                             </div>
                             <div class="accordion-content">
                                 <div class="form-group full-width mb-15">
-                                    <div class="d-flex justify-between align-center mb-10">
-                                        <label style="margin:0;">الشكوى الرئيسية وتطورها (Chief Complaint)</label>
-                                        <button type="button" class="voice-btn" onclick="window.startVoiceDictation('visitComplaint', this)"><i class="fa-solid fa-microphone"></i> إملاء صوتي</button>
-                                    </div>
-                                    <textarea id="visitComplaint" rows="2" placeholder="اكتب أو اضغط على الكبسولات السريعة بالأسفل..."></textarea>
-                                    
-                                    <!-- كبسولات الشكوى السريعة بدون كيبورد -->
-                                    <div class="quick-chips-bar">
-                                        <span class="q-chip" onclick="window.appendChipText('visitComplaint', 'ارتفاع بدرجة الحرارة')">🔥 حرارة</span>
-                                        <span class="q-chip" onclick="window.appendChipText('visitComplaint', 'كحة وبلغم')">😷 كحة</span>
-                                        <span class="q-chip" onclick="window.appendChipText('visitComplaint', 'قيء متكرر')">🤮 قيء</span>
-                                        <span class="q-chip" onclick="window.appendChipText('visitComplaint', 'إسهال مائي')">💧 إسهال</span>
-                                        <span class="q-chip" onclick="window.appendChipText('visitComplaint', 'رشح وانسداد بالأنف')">🤧 رشح</span>
-                                        <span class="q-chip" onclick="window.appendChipText('visitComplaint', 'مغص وانتفاخ بالبطن')">😣 مغص</span>
-                                        <span class="q-chip" onclick="window.appendChipText('visitComplaint', 'ضعف الشهية والرضاعة')">🍼 رفض الرضاعة</span>
-                                        <span class="q-chip" onclick="window.appendChipText('visitComplaint', 'اصفرار بالجلد والعين')">🟡 صفراء</span>
-                                        <span class="q-chip" onclick="window.appendChipText('visitComplaint', 'فحص دوري ومتابعة نمو')">📏 متابعة نمو</span>
-                                    </div>
-
-                                    <div style="background: #f8fafc; padding: 10px 12px; border-radius: 8px; margin-top: 10px; border: 1px dashed var(--border-color);">
+                                    <label>الشكوى الرئيسية وتطورها (Chief Complaint & HPI)</label>
+                                    <textarea id="visitComplaint" rows="2" placeholder="أعراض الطفل الحالية وتطورها..."></textarea>
+                                    <div style="background: #f8fafc; padding: 10px 12px; border-radius: 8px; margin-top: 8px; border: 1px dashed var(--border-color);">
                                         <small class="text-muted"><i class="fa-solid fa-headset"></i> شكوى الاستقبال المسجلة: </small><strong id="receptionComplaintNote" style="color:var(--primary-color);"><span></span></strong>
                                     </div>
-       ="text" id="histNICU" placeholder="السبب والمدة إن وجد"></div>
+                                </div>
+                                <div class="form-grid vitals-mobile-grid">
+                                    <div class="form-group"><label>الوزن (Kg)</label><input type="number" step="0.01" inputmode="decimal" id="vWeight" placeholder="كجم"></div>
+                                    <div class="form-group"><label>الحرارة (°C)</label><input type="number" step="0.1" inputmode="decimal" id="vTemp" placeholder="37.0"></div>
+                                    <div class="form-group"><label>الطول (cm)</label><input type="number" step="0.1" inputmode="decimal" id="vHeight" placeholder="سم"></div>
+                                    <div class="form-group"><label>الأكسجين SpO2 (%)</label><input type="number" inputmode="numeric" id="vSpo2" placeholder="98%"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- الأكورديون 2: الفحص السريري والتاريخ المرضي الثابت -->
+                        <div class="accordion-item">
+                            <div class="accordion-header">
+                                <div class="icon-title"><i class="fa-solid fa-heart-pulse"></i> 2. الفحص السريري والتاريخ المرضي (Exam & History)</div>
+                                <i class="fa-solid fa-chevron-down"></i>
+                            </div>
+                            <div class="accordion-content">
+                                <h4 style="margin:0 0 12px 0; color:var(--primary-color);"><i class="fa-solid fa-stethoscope"></i> الفحص السريري (Examination)</h4>
+                                <div class="form-group full-width mb-15"><input type="text" id="examGeneral" placeholder="General Appearance (Consciousness, Hydration, Activity, Pallor, Jaundice...)"></div>
+                                <div class="form-grid mb-20">
+                                    <div class="form-group"><label>الصدر (Chest)</label><input type="text" id="examResp" placeholder="Air entry, Wheezes, Crepitations..."></div>
+                                    <div class="form-group"><label>القلب (CVS)</label><input type="text" id="examCVS" placeholder="Heart sounds, Murmurs, Perfusion..."></div>
+                                    <div class="form-group"><label>البطن (Abdomen)</label><input type="text" id="examAbd" placeholder="Soft, Lax, Organomegaly..."></div>
+                                    <div class="form-group"><label>أنف وأذن / أعصاب / جلد</label><input type="text" id="examNeuro" placeholder="ENT, Tonsils, Rash, Fontanelle..."></div>
+                                </div>
+                                <div style="border-top: 1px solid var(--border-color); margin: 18px 0;"></div>
+                                <h4 style="margin:0 0 12px 0; color:var(--primary-color);"><i class="fa-solid fa-baby"></i> تاريخ الولادة والحساسية (يُحفظ تلقائياً للزيارات القادمة)</h4>
+                                <div class="form-grid mb-15">
+                                    <div class="form-group"><label>عمر الحمل (GA)</label><input type="text" id="histGestational" placeholder="e.g. 38 weeks"></div>
+                                    <div class="form-group"><label>نوع الولادة</label><select id="histDelivery"><option value="">اختر...</option><option value="NVD">طبيعي (NVD)</option><option value="CS">قيصري (CS)</option></select></div>
+                                    <div class="form-group"><label>وزن الولادة (Kg)</label><input type="number" step="0.01" inputmode="decimal" id="histBirthWeight" placeholder="e.g. 3.1"></div>
+                                    <div class="form-group"><label>دخول الحضانة (NICU)</label><input type="text" id="histNICU" placeholder="السبب والمدة إن وجد"></div>
                                 </div>
                                 <div class="form-group full-width"><label>تاريخ الحساسية والأمراض المزمنة أو الوراثية</label><textarea id="histPastFamily" rows="2" placeholder="حساسية ألبان/أدوية، أنيميا الفول، ربو شعبي..."></textarea></div>
                             </div>
@@ -1637,74 +1598,63 @@
         });
 
         // ==========================================
-        // 8. محرك النمو التفاعلي التراكمي + المساعد الذكي (Built-in Interactive Growth & Smart EMR)
+        // 8. محرك النمو التفاعلي (Growth Engine)
         // ==========================================
-        let interactiveGrowthChartInstance = null;
+        document.getElementById('btnCalcGrowth')?.addEventListener('click', updateGrowthUI);
+        document.getElementById('gChartIndicator')?.addEventListener('change', updateGrowthUI);
 
-        // 1. دوال الكبسولات السريعة والفحص الطبيعي والإملاء الصوتي
-        window.appendChipText = function(fieldId, text) {
-            const el = document.getElementById(fieldId);
-            if (!el) return;
-            const current = el.value.trim();
-            el.value = current ? `${current} ، ${text}` : text;
-            el.dispatchEvent(new Event('input'));
-        };
+        async function updateGrowthUI() {
+            if(!GrowthCalculator || !growthRenderer) { showToast("محرك النمو غير متاح حالياً", "error"); return; }
+            const weight = parseFloat(document.getElementById('gWeight').value); 
+            const height = parseFloat(document.getElementById('gHeight').value); 
+            const hc = parseFloat(document.getElementById('gHC').value);
+            const ref = document.getElementById('gChartType').value; 
+            const indicator = document.getElementById('gChartIndicator').value;
+            if (!weight && !height && !hc) return showToast("أدخل قياساً واحداً على الأقل", "error");
 
-        window.fillNormalExam = function() {
-            document.getElementById('examGeneral').value = 'Conscious, alert, active, well hydrated, no pallor or jaundice';
-            document.getElementById('examResp').value = 'Good bilateral equal air entry, no wheezes or crepitations';
-            document.getElementById('examCVS').value = 'S1 + S2 + 0, regular rhythm, normal capillary refill';
-            document.getElementById('examAbd').value = 'Soft, lax, painless, no organomegaly';
-            document.getElementById('examNeuro').value = 'NAD, normal tone & reflexes, clear ENT';
-            showToast("تم ملء الفحص الطبيعي بالكامل");
-        };
-
-        window.startVoiceDictation = function(fieldId, btnEl) {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!SpeechRecognition) return showToast("متصفح الموبايل الحالي لا يدعم الإملاء الصوتي المباشر", "error");
-            const recognition = new SpeechRecognition();
-            recognition.lang = 'ar-EG';
-            recognition.interimResults = false;
-            btnEl.classList.add('listening');
-            btnEl.innerHTML = '<i class="fa-solid fa-circle-dot"></i> تحدث الآن...';
-            recognition.onresult = (event) => {
-                const transcript = event.results[0][0].transcript;
-                window.appendChipText(fieldId, transcript);
+            let bmi = (weight > 0 && height > 0) ? (weight / Math.pow(height / 100, 2)).toFixed(2) : null;
+            const dobStr = document.getElementById('phDOB').innerText;
+            const ageMonths = GrowthCalculator.getExactAgeInMonths(dobStr, new Date());
+            
+            const resultsBox = document.getElementById('growthResultsBox'); resultsBox.classList.remove('hidden');
+            let html = `<strong style="color:var(--primary-color);"><i class="fa-solid fa-chart-line"></i> التقييم السريري الدقيق للنمو:</strong><ul style="margin-top:10px; padding-right:20px; line-height:1.8;">`;
+            
+            const renderEval = (ind, val, name) => {
+                if (!val) return '';
+                const res = GrowthCalculator.evaluateMeasurement(ind, val, ageMonths, document.getElementById('phGender').innerText, ref);
+                if (res.error) return `<li><strong>${name}:</strong> ${val} <span class="text-muted">(${res.error})</span></li>`;
+                let color = (Math.abs(res.zScore) >= 2) ? 'var(--danger-color)' : 'var(--success-color)';
+                return `<li><strong>${name}:</strong> ${val} | <span style="color:${color}; font-weight:bold;">Z: ${res.zScore}</span> | P: ${res.percentile}% <br><small class="text-muted">${res.interpretation}</small></li>`;
             };
-            recognition.onend = () => {
-                btnEl.classList.remove('listening');
-                btnEl.innerHTML = '<i class="fa-solid fa-microphone"></i> إملاء صوتي';
-            };
-            recognition.start();
-        };
 
-        // 2. بروتوكولات د. أحمد الجاهزة بضغطة واحدة (1-Click Clinical Bundles)
-        window.applyClinicalBundle = function(type) {
-            const w = parseFloat(document.getElementById('vWeight').value) || 10;
-            const paraDose = Math.round((w * 15 / 24) * 2) / 2; // حساب الباراسيتامول 120mg/5ml
-            if (type === 'GE') {
-                document.getElementById('visitComplaint').value = 'قيء متكرر وإسهال مائي مع ضعف الشهية';
-                document.getElementById('diagPrimary').value = 'A09 - Acute Gastroenteritis (نزلة معوية حادة)';
-                currentMedications = [
-                    { name: 'Ondansetron / Danset Syrup', dose: `${Math.max(2, Math.round(w * 0.15 * 2.5))} ml`, duration: 'Every 12 hours for 3 days', notes: 'قبل الرضاعة أو الأكل بنصف ساعة عند القيء' },
-                    { name: 'Hidrasec / Racecadotril Sachets', dose: '1 Sachet', duration: 'Every 8 hours for 5 days', notes: 'يذاب على ماء أو زبادي' },
-                    { name: 'Enterogermina / Probiotic Vials', dose: '1 Vial', duration: 'Once daily for 5 days', notes: 'شرب بالفم لتحسين الأمعاء' },
-                    { name: 'ORS (محلول معالجة الجفاف)', dose: '50 ml after each loose stool', duration: 'PRN', notes: 'يرشف ببطء بالمعلقة' }
-                ];
-                document.getElementById('planNotes').value = 'التركيز على السوائل ومحلول الجفاف، مسلوق (أرز، تفاح، بطاطس، موز، زبادي) ومنع المقليات والسكريات.';
-            } else if (type === 'TONSILS') {
-                document.getElementById('visitComplaint').value = 'ارتفاع شديد بالحرارة وصعوبة في البلع';
-                document.getElementById('examNeuro').value = 'Severely congested throat & hypertrophied tonsils';
-                document.getElementById('diagPrimary').value = 'J03.90 - Acute Tonsillitis / Pharyngitis (التهاب اللوزتين والحلق)';
-                currentMedications = [
-                    { name: 'Augmentin / Curam (457mg/5ml) Susp', dose: `${Math.round((w * 45 / 2 / 91.4) * 2) / 2} ml`, duration: 'Every 12 hours for 7 days', notes: 'يرج جيداً ويحفظ بالثلاجة' },
-                    { name: 'Cetal / Abimol Syrup (120mg/5ml)', dose: `${paraDose} ml`, duration: 'Every 6-8 hours', notes: 'عند ارتفاع الحرارة' },
-                    { name: 'Brufen / Nurofen Syrup (100mg/5ml)', dose: `${Math.round(w * 0.5)} ml`, duration: 'Every 8 hours after food', notes: 'مضاد للالتهاب وخافض للحرارة' }
-                ];
-                document.getElementById('planNotes').value = 'سوائل دافئة وعصائر طبيعية، كمادات مياه فاترة على الرقبة وتحت الإبط عند الحرارة.';
-            } else if (type === 'CHEST') {
-                document.getElementById('visitComplaint').value = 'كحة شديدة وتزييق بالصدر وصعوبة بالتنفس';
-    
+            html += renderEval('WFA', weight, 'الوزن (كجم)');
+            if (height) html += `<li><strong>الطول:</strong> ${height} سم</li>`;
+            if (hc) html += `<li><strong>محيط الرأس:</strong> ${hc} سم</li>`;
+            resultsBox.innerHTML = html + `</ul>`;
+
+            const pastVisits = window.patientVisitHistory || [];
+            const historicalPoints = [];
+            pastVisits.slice().reverse().forEach(v => {
+                const gData = v.growth || v.vitals;
+                if (gData) {
+                    const dateObj = v.createdAt?.toDate ? v.createdAt.toDate() : new Date();
+                    const aM = GrowthCalculator.getExactAgeInMonths(dobStr, dateObj);
+                    let val = null;
+                    if (indicator === 'WFA' && gData.weight) val = gData.weight;
+                    else if (indicator === 'LFA' && gData.height) val = gData.height;
+                    else if (indicator === 'HCFA' && gData.hc) val = gData.hc;
+                    else if (indicator === 'BMI' && gData.weight && gData.height) val = (gData.weight / Math.pow(gData.height/100, 2)).toFixed(2);
+                    if (val) historicalPoints.push({ x: parseFloat(aM.toFixed(2)), y: parseFloat(val).toFixed(2) });
+                }
+            });
+
+            let cVal = null;
+            if (indicator === 'WFA') cVal = weight; else if (indicator === 'LFA') cVal = height; else if (indicator === 'HCFA') cVal = hc; else if (indicator === 'BMI') cVal = bmi;
+            if (cVal) historicalPoints.push({ x: parseFloat(ageMonths.toFixed(2)), y: parseFloat(cVal).toFixed(2) });
+
+            growthRenderer.render(indicator, historicalPoints);
+        }
+
         // ==========================================
         // 9. لوحة التطعيمات الذكية (Smart Vaccines Dashboard)
         // ==========================================
