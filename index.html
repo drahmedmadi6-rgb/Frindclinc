@@ -1078,21 +1078,23 @@
         }
 
         // ==========================================
-        // السجل المرضي للزيارات السابقة (النسخة الصحيحة والمنبثقة)
+        // السجل المرضي للزيارات السابقة (نسخة مضادة للأخطاء)
         // ==========================================
         window.patientVisitHistory = [];
 
         async function getPreviousVisits(patientId, excludeVisitId) {
-            // شيلنا فلتر status من هنا عشان الفايربيز ميطلعش Error
+            // جلب كل زيارات المريض بدون فلتر Status لتجنب خطأ الـ Index الصامت
             const q = query(collection(db, "visits"), where("patientId", "==", patientId));
             const snap = await getDocs(q); 
             let visits = [];
             snap.forEach(d => { 
                 const data = d.data();
-                if(d.id !== excludeVisitId && data.status === "Completed") {
+                // استبعاد الزيارة الحالية
+                if(d.id !== excludeVisitId) {
                     visits.push({ id: d.id, ...data }); 
                 }
             });
+            // ترتيب الزيارات من الأحدث للأقدم
             return visits.sort((a,b) => {
                 let t1 = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : 0;
                 let t2 = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : 0;
@@ -1103,14 +1105,15 @@
         async function loadPreviousVisits() {
             const container = document.getElementById('previousVisitsContainer'); 
             if(!container) return;
-            container.innerHTML = '<p class="text-muted"><i class="fa-solid fa-spinner fa-spin"></i> جاري تحميل السجل المرضي...</p>';
+            
+            container.innerHTML = '<div style="padding:20px; text-align:center;"><p class="text-muted"><i class="fa-solid fa-spinner fa-spin"></i> جاري البحث عن الزيارات السابقة...</p></div>';
             
             try {
                 const visits = await getPreviousVisits(currentPatientId, currentVisitId);
                 window.patientVisitHistory = visits;
 
                 if(visits.length === 0) { 
-                    container.innerHTML = '<p class="text-muted" style="padding:15px; background:#f8fafc; border-radius:8px; border:1px dashed #cbd5e1;">لا توجد زيارات سابقة (معتمدة) لهذا الطفل.</p>'; 
+                    container.innerHTML = '<div style="background:#f8fafc; padding:20px; border-radius:8px; border:1px dashed #cbd5e1; text-align:center;"><p style="margin:0; color:var(--text-main);"><strong>لا توجد زيارات سابقة مسجلة لهذا الطفل</strong></p></div>'; 
                     return; 
                 }
                 
@@ -1118,23 +1121,29 @@
                 visits.forEach((v, index) => {
                     let dateStr = v.createdAt?.toDate ? v.createdAt.toDate().toLocaleDateString('ar-EG') : 'تاريخ غير مسجل';
                     let diag = (v.diagnoses && v.diagnoses.primary) ? v.diagnoses.primary : 'لم يسجل تشخيص';
+                    // تمييز الكشف المكتمل عن المسودة
+                    let statusBadge = v.status === 'Completed' ? '<span class="badge completed" style="background:#10b981; color:#fff;">مكتملة</span>' : '<span class="badge waiting" style="background:#f59e0b; color:#fff;">مسودة</span>';
                     
                     html += `
                     <div class="card" onclick="window.showVisitDetails(${index})" style="padding:15px; margin-bottom:12px; background:#fff; border:1px solid var(--border-color); cursor:pointer; box-shadow:0 2px 4px rgba(0,0,0,0.05); transition:all 0.2s;">
                         <div class="d-flex justify-between align-center mb-10">
                             <strong style="font-size:1.1rem;"><i class="fa-regular fa-calendar text-primary"></i> <span dir="ltr">${dateStr}</span></strong>
-                            <span class="badge" style="background:var(--primary-color); color:#fff;"><i class="fa-solid fa-up-right-from-square"></i> التفاصيل</span>
+                            ${statusBadge}
                         </div>
                         <p style="color:var(--primary-color); margin:5px 0;"><strong>التشخيص:</strong> ${diag}</p>
                         <p style="margin:0; font-size:0.95rem; color:var(--text-muted);"><strong>الشكوى:</strong> ${v.chiefComplaint || '-'}</p>
+                        <div style="margin-top:10px; text-align:left;">
+                            <span class="btn-small" style="background:#e0f2fe; color:#0369a1; border-radius:4px; padding:4px 8px; font-size:0.8rem;"><i class="fa-solid fa-up-right-from-square"></i> التفاصيل الكاملة</span>
+                        </div>
                     </div>`;
                 });
                 container.innerHTML = html;
             } catch(e) { 
-                container.innerHTML = `<div style="color:var(--danger-color); padding:10px;">خطأ في جلب البيانات: ${e.message}</div>`; 
+                container.innerHTML = `<div style="background:#fef2f2; border:1px solid #fca5a5; padding:15px; border-radius:8px; color:#991b1b;"><strong>خطأ في جلب البيانات:</strong> ${e.message}</div>`; 
                 console.error("Visit History Error:", e); 
             }
         }
+
 
         window.showVisitDetails = function(index) {
             const visit = window.patientVisitHistory[index];
